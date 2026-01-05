@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 语言精进日历</title>
+    <style>
+        :root { --gold: #b8860b; --bg: #fdfaf2; --accent: #603; --done: #28a745; }
+        body { font-family: 'STSong', 'PingFang SC', serif; background: #eee; display: flex; flex-direction: column; align-items: center; padding: 15px; margin: 0; }
+        .calendar-nav { display: grid; grid-template-columns: repeat(11, 1fr); gap: 4px; margin-bottom: 15px; background: #fff; padding: 8px; border-radius: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .cal-dot { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; border: 1px solid #eee; border-radius: 4px; color: #999; position: relative; }
+        .cal-dot.active { border: 1px solid var(--gold); background: #fff9eb; color: var(--gold); font-weight: bold; }
+        .cal-dot.completed::after { content: ''; width: 4px; height: 4px; background: var(--done); border-radius: 50%; position: absolute; bottom: 1px; }
+        
+        .container { background: var(--bg); max-width: 600px; width: 100%; padding: 25px; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); box-sizing: border-box; }
+        .date-header { text-align: center; border-bottom: 1px solid #ddd; margin-bottom: 20px; padding-bottom: 10px; }
+        .date-main { font-size: 1.3em; font-weight: bold; margin: 0; color: #333; }
+        .date-sub { font-size: 0.8em; color: #666; margin: 4px 0; line-height: 1.5; }
+        
+        .section-title { border-left: 3px solid var(--gold); padding-left: 8px; margin: 20px 0 10px; font-weight: bold; font-size: 0.95em; color: #444; }
+        .quote-item { margin-bottom: 12px; }
+        .quote-text { font-size: 0.95em; line-height: 1.4; color: #111; font-weight: 500; }
+        .quote-cn { font-size: 0.85em; color: #666; margin-top: 2px; font-style: italic; }
+        
+        .exercise-container { background: rgba(0,0,0,0.02); padding: 12px; border-radius: 4px; margin-bottom: 10px; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .opt-btn { padding: 10px; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 4px; font-size: 0.85em; text-align: left; }
+        .opt-btn.correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724; }
+        .opt-btn.wrong { background: #f8d7da !important; border-color: #dc3545 !important; }
+        
+        textarea { width: 100%; height: 75px; margin-top: 8px; border: 1px solid #ddd; border-radius: 4px; padding: 10px; box-sizing: border-box; font-size: 13px; background: rgba(255,255,255,0.5); }
+        .ans-show { margin-top: 8px; font-size: 0.85em; color: #33c; display: none; padding: 8px; background: #eef; border-radius: 4px; }
+        .secret-trigger { height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #ddd; font-size: 14px; margin-top: 10px; }
+        .hidden-content { display: none; }
+        ruby rt { font-size: 0.6em; color: var(--gold); }
+    </style>
+</head>
+<body>
+
+<div id="calendar-view" class="calendar-nav"></div>
+
+<div class="container">
+    <div class="date-header">
+        <h1 class="date-main" id="date-cn">加载中...</h1>
+        <p class="date-sub" id="date-lang-sub"></p>
+        <p style="color:var(--gold); font-size:0.85em; font-weight:bold; margin-top:5px;" id="lunar-info"></p>
+    </div>
+
+    <div class="quote-box">
+        <div class="quote-item">
+            <div class="quote-text"><strong>EN:</strong> <span id="en_q"></span></div>
+            <div class="quote-cn" id="en_cn"></div>
+        </div>
+        <div class="quote-item">
+            <div class="quote-text"><strong>JP:</strong> <span id="jp_q"></span></div>
+            <div class="quote-cn" id="jp_cn"></div>
+        </div>
+        <div class="quote-item">
+            <div class="quote-text"><strong>FR:</strong> <span id="fr_q"></span></div>
+            <div class="quote-cn" id="fr_cn"></div>
+        </div>
+    </div>
+
+    <div id="exercises-area">
+        <div class="section-title">语言习题</div>
+        <div class="exercise-container">
+            <p><strong>日本語:</strong> <span id="jp_ex_q"></span></p>
+            <div id="jp_input_area"></div>
+        </div>
+        <div class="exercise-container">
+            <p><strong>Français:</strong> <span id="fr_ex_q"></span></p>
+            <div id="fr_input_area"></div>
+        </div>
+    </div>
+
+    <div class="section-title">创作空间</div>
+    <div class="exercise-container">
+        <p id="write_c_q" style="font-size:0.9em; margin-bottom:5px;"></p>
+        <textarea id="write_c_input" oninput="saveCurrentData()" placeholder="自由写作..."></textarea>
+    </div>
+
+    <div class="secret-trigger" onclick="toggleAdult()">♢</div>
+    <div class="hidden-content" id="adult-content">
+        <div class="exercise-container" style="border-top: 1px solid var(--accent);">
+            <p id="write_a_q" style="font-size:0.9em; margin-bottom:5px; font-weight:bold; color:var(--accent);"></p>
+            <textarea id="write_a_input" oninput="saveCurrentData()" placeholder="输入私密内容..."></textarea>
+        </div>
+    </div>
+</div>
+
+<script>
+// 这里我为你手动补齐了 1-5 号名言的所有汉译
+const calendarData = 
+[
+  {
+    "date": "2026-01-01",
+    "week_cn": "星期四",
+    "date_jp": "<ruby>一月一日<rt>いちがつついたち</rt></ruby>（<ruby>木曜日<rt>もくようび</rt></ruby>）",
+    "date_fr": "Jeudi premier Janvier",
+    "lunar": "冬月十三 · 元旦",
+    "en_q": "The first step towards getting somewhere is to decide you are not going to stay where you are.",
+    "en_cn": "迈向目标的第一步，是决定不再停留在原地。",
+    "jp_q": "<ruby>今年<rt>ことし</rt></ruby>もどうぞよろしくお<ruby>願<rt>ねが</rt></ruby>いします。",
+    "jp_cn": "今年也请多多关照。",
+    "fr_q": "Bonne année et bonne santé !",
+    "fr_cn": "新年快乐，身体健康！",
+    "jp_ex": "お<ruby>正月<rt>しょうがつ</rt></ruby>の（　）に、<ruby>家族<rt>かぞく</rt></ruby>で<ruby>神社<rt>じんじゃ</rt></ruby>に<ruby>行<rt>い</rt></ruby>きました。 A.あいだ B.うち C.とき D.あいだに",
+    "jp_ans": "A",
+    "fr_ex": "Hier, nous (　) le réveillon ensemble. A.avons fêté B.fêtons C.fêtions D.fêterons",
+    "fr_ans": "A",
+    "write_c": "为 2026 年写一段开篇寄语。",
+    "write_a": "描写在元旦午夜的喧嚣中，你吻了一个最不该触碰的人。刻画对方呼吸里残留的冷冽香槟味，以及那种打破禁忌、在众目睽睽下偷来的紧绷感。"
+  },
+  {
+    "date": "2026-01-02",
+    "week_cn": "星期五",
+    "date_jp": "<ruby>一月二日<rt>いちがつふつか</rt></ruby>（<ruby>金曜日<rt>きんようび</rt></ruby>）",
+    "date_fr": "Vendredi deux Janvier",
+    "lunar": "冬月十四",
+    "en_q": "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+    "en_cn": "成功不是终点，失败也非终结：唯有继续前行的勇气才是最重要的。",
+    "jp_q": "<ruby>継続<rt>けいぞく</rt></ruby>は<ruby>力<rt>ちから</rt></ruby>なり。",
+    "jp_cn": "坚持就是力量。",
+    "fr_q": "Vouloir, c'est pouvoir.",
+    "fr_cn": "有志者事竟成。",
+    "jp_ex": "この<ruby>仕事<rt>しごと</rt></ruby>は<ruby>明日<rt>あした</rt></ruby>までに（　）なりません。 A.おわらなければ B.おわって C.おわれば D.おわらない",
+    "jp_ans": "A",
+    "fr_ex": "Il est important que tu (　) tes objectifs. A.finis B.finisses C.finiras D.finissait",
+    "fr_ans": "B",
+    "write_c": "描述你的第一个新年工作/学习目标。",
+    "write_a": "身为一名周旋于名流圈的高级陪侍，你早已习惯剥离情感。描写当你为那位权贵客户解开定制衬衫扣子时，指尖触碰到他温热颈侧瞬间产生的、那种让你感到不安的迷恋感。"
+  },
+  {
+    "date": "2026-01-03",
+    "week_cn": "星期六",
+    "date_jp": "<ruby>一月三日<rt>いちがつみっか</rt></ruby>（<ruby>土曜日<rt>どようび</rt></ruby>）",
+    "date_fr": "Samedi trois Janvier",
+    "lunar": "冬月十五",
+    "en_q": "The only way to do great work is to love what you do.",
+    "en_cn": "成就伟大事业的唯一途径就是热爱你所做的事。",
+    "jp_q": "<ruby>好<rt>す</rt></ruby>きこそ<ruby>物<rt>もの</rt></ruby>の<ruby>上手<rt>じょうず</rt></ruby>なれ。",
+    "jp_cn": "兴趣是最好的老师。",
+    "fr_q": "Petit à petit, l'oiseau fait son nid.",
+    "fr_cn": "不积跬步，无以至千里。",
+    "jp_ex": "すみません、この<ruby>漢字<rt>かんじ</rt></ruby>の<ruby>読<rt>よ</rt></ruby>み（　）を<ruby>教<rt>おし</rt></ruby>えてください。 A.かた B.ほう C.ため D.こと",
+    "jp_ans": "A",
+    "fr_ex": "C'est l'appartement (　) je t'ai parlé. A.que B.qui C.dont D.où",
+    "fr_ans": "C",
+    "write_c": "记录一段冬日早晨的寂静。",
+    "write_a": "在说出“我愿意”之前，你渴望最后一次探索未知的欲望边界。描写你与那个截然不同的情人在隐秘空间里的纠缠，侧重描写对方汗湿的皮肤触感与即将告别自由的狂热沉沦。"
+  },
+  {
+    "date": "2026-01-04",
+    "week_cn": "星期日",
+    "date_jp": "<ruby>一月四日<rt>いちがつよっか</rt></ruby>（<ruby>日曜日<rt>にちようび</rt></ruby>）",
+    "date_fr": "Dimanche quatre Janvier",
+    "lunar": "冬月十六",
+    "en_q": "Everything you've ever wanted is on the other side of fear.",
+    "en_cn": "你想要的一切都在恐惧的另一边。",
+    "jp_q": "<ruby>七転八起<rt>しちてんはっき</rt></ruby>。",
+    "jp_cn": "不屈不挠。",
+    "fr_q": "Il n'y a que le premier pas qui coûte.",
+    "fr_cn": "万事开头难。",
+    "jp_ex": "<ruby>日本<rt>にほん</rt></ruby>へ（　）ばかりのときは、<ruby>全<rt>まった</rt></ruby>く<ruby>話<rt>はな</rt></ruby>せませんでした。 A.きた B.くる C.こよう D.きている",
+    "jp_ans": "A",
+    "fr_ex": "Si tu (　) là, on pourrait sortir. A.es B.as été C.étais D.serais",
+    "fr_ans": "C",
+    "write_c": "描写一个搬家后发现的旧信件。",
+    "write_a": "新搬入的老宅似乎有某种“幽灵”在徘徊。描写深夜当你独自躺在被窝时，那种冰冷而极其精准的感触如何游走在你的锁骨与脚踝，刻画这种超自然存在带来的惊悚与快感交织。"
+  },
+  {
+    "date": "2026-01-05",
+    "week_cn": "星期一",
+    "date_jp": "<ruby>一月五日<rt>いちがついつか</rt></ruby>（<ruby>月曜日<rt>げつようび</rt></ruby>）",
+    "date_fr": "Lundi cinq Janvier",
+    "lunar": "冬月十七 · 小寒",
+    "en_q": "Believe you can and you're halfway there.",
+    "en_cn": "相信你能行，你就已经成功了一半。",
+    "jp_q": "<ruby>温故知新<rt>おんこちしん</rt></ruby>。",
+    "jp_cn": "温故而知新。",
+    "fr_q": "Après la pluie, le beau temps.",
+    "fr_cn": "雨过天晴。",
+    "jp_ex": "<ruby>昨日<rt>きのう</rt></ruby>は<ruby>寒<rt>さむ</rt></ruby>かった（　）、コートを<ruby>着<rt>き</rt></ruby>ませんでした。 A.のに B.ので C.から D.ため",
+    "jp_ans": "A",
+    "fr_ex": "Elle a mangé toutes les pommes que j' (　) hier. A.ai achetées B.avais achetées C.ai acheté D.avais acheté",
+    "fr_ans": "B",
+    "write_c": "描写在寒冷街头等待某人的心情。",
+    "write_a": "在死寂般的早高峰交通拥堵中，你坐在驾驶位决定给自己一点私密的安慰。描写窗外灰蒙蒙的尾气与车内逼仄空间的燥热，以及邻车卡车司机居高临下的窥视如何让你的脉搏跳动得更剧烈。"
+  },
+  {
+    "date": "2026-01-06",
+    "week_cn": "星期二",
+    "date_jp": "<ruby>一月六日<rt>いちがつむいか</rt></ruby>（<ruby>火曜日<rt>かようび</rt></ruby>）",
+    "date_fr": "Mardi six Janvier",
+    "lunar": "冬月十八",
+    "en_q": "The secret of getting ahead is getting started.",
+    "en_cn": "领先的秘诀在于开始。",
+    "jp_q": "<ruby>急<rt>いそ</rt></ruby>がば<ruby>回<rt>まわ</rt></ruby>れ。",
+    "jp_cn": "欲速则不达。",
+    "fr_q": "L'habit ne fait pas le moine.",
+    "fr_cn": "人不可貌相。",
+    "jp_ex": "<ruby>日本語<rt>にほんご</rt></ruby>を（　）ために、<ruby>毎日<rt>まいにち</rt></ruby><ruby>練習<rt>れんしゅう</rt></ruby>しています。 A.じょうずになる B.じょうずな C.じょうず D.じょうずにして",
+    "jp_ans": "A",
+    "fr_ex": "Je ne pense pas qu'il (　) venir demain. A.peut B.puisse C.pouvait D.pourra",
+    "fr_ans": "B",
+    "write_c": "想象一次 21 世纪的电子浪漫场景。",
+    "write_a": "通过加密的 4K 视频通话，你们在虚拟的空间里进行午夜之约。描写屏幕冷光映照下，对方因你的言语指令而逐渐染上绯色的皮肤，以及那种只能掌控对方动作却无法触碰体温的焦灼欲望。"
+  },
+  {
+    "date": "2026-01-07",
+    "week_cn": "星期三",
+    "date_jp": "<ruby>一月七日<rt>いちがつなのか</rt></ruby>（<ruby>水曜日<rt>すいようび</rt></ruby>）",
+    "date_fr": "Mercredi sept Janvier",
+    "lunar": "冬月十九",
+    "en_q": "Be yourself; everyone else is already taken.",
+    "en_cn": "做你自己，因为别人都有人做了。",
+    "jp_q": "<ruby>猿<rt>さる</rt></ruby>も<ruby>木<rt>き</rt></ruby>から<ruby>落<rt>お</rt></ruby>ちる。",
+    "jp_cn": "智者千虑，必有一失。",
+    "fr_q": "La nuit porte conseil.",
+    "fr_cn": "黑夜能给人智慧。",
+    "jp_ex": "<ruby>隣<rt>となり</rt></ruby>の<ruby>部屋<rt>へや</rt></ruby>から（　）ような<ruby>声<rt>こえ</rt></ruby>が<ruby>聞<rt>き</rt></ruby>こえます。 A.わらう B.わらって C.わらっている D.わらわ",
+    "jp_ans": "C",
+    "fr_ex": "Voici le livre (　) je t'ai promis. A.que B.qui C.dont D.lequel",
+    "fr_ans": "A",
+    "write_c": "写下一段被邻居打扰后的心理独白。",
+    "write_a": "公寓墙壁极薄。描写你将脊背紧贴冰冷的墙面，聆听隔壁邻居剧烈的欢好声。刻画墙壁传导而来的节奏性震动，以及那种因极度偷听羞耻而诱发的生理渴求。"
+  },
+  {
+    "date": "2026-01-08",
+    "week_cn": "星期四",
+    "date_jp": "<ruby>一月八日<rt>いちがつようか</rt></ruby>（<ruby>木曜日<rt>もくようび</rt></ruby>）",
+    "date_fr": "Jeudi huit Janvier",
+    "lunar": "冬月二十",
+    "en_q": "Simplicity is the ultimate sophistication.",
+    "en_cn": "简约是极致的复杂。",
+    "jp_q": "<ruby>習<rt>なら</rt></ruby>うより<ruby>慣<rt>な</rt></ruby>れろ。",
+    "jp_cn": "熟能生巧。",
+    "fr_q": "C'est en forgeant qu'on devient forgeron.",
+    "fr_cn": "实践出真知（熟能生巧）。",
+    "jp_ex": "<ruby>部長<rt>ぶちょう</rt></ruby>に（　）、レポートをほめられました。 A.いわれて B.いわせて C.いわれてから D.いわれ",
+    "jp_ans": "A",
+    "fr_ex": "Donne-(　) ton livre ! A.le B.moi C.me D.je",
+    "fr_ans": "B",
+    "write_c": "记录一个宿醉后的清晨感官。",
+    "write_a": "在一场荒诞派对后的清晨醒来，你赤裸地躺在男女主人之间。描写宿醉后的头痛如何被一种新奇的权力错位感取代——当你发现左侧是女主人的软玉温香，右侧是男主人的结实胸膛。"
+  },
+  {
+    "date": "2026-01-09",
+    "week_cn": "星期五",
+    "date_jp": "<ruby>一月九日<rt>いちがつここのか</rt></ruby>（<ruby>金曜日<rt>きんようび</rt></ruby>）",
+    "date_fr": "Vendredi neuf Janvier",
+    "lunar": "冬月廿一",
+    "en_q": "Whatever you are, be a good one.",
+    "en_cn": "无论你是什么，都要做一个好的。",
+    "jp_q": "<ruby>聞<rt>き</rt></ruby>くは<ruby>一時<rt>いっとき</rt></ruby>の<ruby>恥<rt>はじ</rt></ruby>、<ruby>聞<rt>き</rt></ruby>かぬは<ruby>一生<rt>いっしょう</rt></ruby>の<ruby>恥<rt>はじ</rt></ruby>。",
+    "jp_cn": "不懂装懂，贻害无穷。",
+    "fr_q": "L'amour est aveugle.",
+    "fr_cn": "爱情是盲目的。",
+    "jp_ex": "<ruby>暗<rt>くら</rt></ruby>くて（　）見えません。 A.なにも B.だれも C.どこも D.いつも",
+    "jp_ans": "A",
+    "fr_ex": "Je voudrais un café (　) sucre, s'il vous plaît. A.sans B.avec C.sur D.sous",
+    "fr_ans": "A",
+    "write_c": "描述电影院昏暗灯光下的一张脸。",
+    "write_a": "在阴暗潮湿的电影院最后一排，描写一双陌生而滚烫的手如何在银幕爆炸声的掩护下，拨开你的衣物。刻画斑驳光影映在你脸上时，你因极度克制呻吟而产生的生理性颤抖。"
+  },
+  {
+    "date": "2026-01-10",
+    "week_cn": "星期六",
+    "date_jp": "<ruby>一月十日<rt>いちがつとおか</rt></ruby>（<ruby>土曜日<rt>どようび</rt></ruby>）",
+    "date_fr": "Samedi dix Janvier",
+    "lunar": "冬月廿二",
+    "en_q": "Happiness depends upon ourselves.",
+    "en_cn": "幸福取决于我们自己。",
+    "jp_q": "<ruby>笑<rt>わら</rt></ruby>う<ruby>門<rt>かど</rt></ruby>には<ruby>福<rt>ふく</rt></ruby><ruby>来<rt>きた</rt></ruby>る。",
+    "jp_cn": "笑口常开，好运自来。",
+    "fr_q": "Chacun voit midi à sa porte.",
+    "fr_cn": "人各执己见。",
+    "jp_ex": "プロの（　）、<ruby>特別<rt>とくべつ</rt></ruby>なサービスを<ruby>提供<rt>ていきょう</rt></ruby>しました。 A.として B.にとって C.について D.において",
+    "jp_ans": "A",
+    "fr_ex": "Elle parle (　) que sa sœur. A.mieux B.meilleur C.bien D.bon",
+    "fr_ans": "A",
+    "write_c": "描写当你想要获得额外好处时的表情控制。",
+    "write_a": "作为一名职业陪侍，你被严令禁止与客人结合。描写你为了换取那笔惊人的高额小费，如何运用除此之外的一切感官技巧，在规则的边缘游走，直到对方彻底缴械投降。"
+  },
+  {
+    "date": "2026-01-11",
+    "week_cn": "星期日",
+    "date_jp": "<ruby>一月十一日<rt>いちがつじゅういちにち</rt></ruby>（<ruby>日曜日<rt>にちようび</rt></ruby>）",
+    "date_fr": "Dimanche onze Janvier",
+    "lunar": "冬月廿三",
+    "en_q": "Life is either a daring adventure or nothing at all.",
+    "en_cn": "生活要么是一场勇敢的冒险，要么就什么都不是。",
+    "jp_q": "<ruby>和敬静寂<rt>わけいせいじゃく</rt></ruby>。",
+    "jp_cn": "和敬清寂（茶道四规）。",
+    "fr_q": "Qui ne risque rien n'a rien.",
+    "fr_cn": "不入虎穴，焉得虎子。",
+    "jp_ex": "<ruby>吹雪<rt>ふぶき</rt></ruby>の（　）、<ruby>停電<rt>ていでん</rt></ruby>になってしまいました。 A.せいで B.おかげで C.ために D.ながら",
+    "jp_ans": "A",
+    "fr_ex": "Il fait si froid que je (　) mes mains. A.sens B.ne sens plus C.sentirai D.ai senti",
+    "fr_ans": "B",
+    "write_c": "描写在停电的黑暗中感官的变化。",
+    "write_a": "暴风雪肆虐导致暖气骤停，你与同性室友被困在如冰窖般的黑暗中。描写为了取暖而纠缠在一起的两具温热身体。刻画对方身上混合着冷香与体温的独特气息如何引爆了另一场燥热。"
+  },
+  {
+    "date": "2026-01-12",
+    "week_cn": "星期一",
+    "date_jp": "<ruby>一月十二日<rt>いちがつじゅうににち</rt></ruby>（<ruby>月曜日<rt>げつようび</rt></ruby>）",
+    "date_fr": "Lundi douze Janvier",
+    "lunar": "冬月廿四",
+    "en_q": "Love all, trust a few, do wrong to none.",
+    "en_cn": "爱所有人，信少数人，不亏待任何人。",
+    "jp_q": "<ruby>案<rt>あん</rt></ruby>ずるより<ruby>産<rt>う</rt></ruby>むが<ruby>易<rt>やす</rt></ruby>し。",
+    "jp_cn": "忧虑不如实践（车到山前必有路）。",
+    "fr_q": "Mieux vaut tard que jamais.",
+    "fr_cn": "亡羊补牢，为时不晚。",
+    "jp_ex": "<ruby>妻<rt>つま</rt></ruby>が（　）とき、ちょうど<ruby>恋人<rt>こいびと</rt></ruby>と<ruby>一緒<rt>いっしょ</rt></ruby>にいました。 A.かえってきた B.かえっていく C.かえってきている D.かえった",
+    "jp_ans": "A",
+    "fr_ex": "Elle est rentrée alors que je (　) avec mon amie. A.suis B.étais C.serais D.ai été",
+    "fr_ans": "B",
+    "write_c": "记录一次令你心跳加速的意外转折。",
+    "write_a": "你正与情人在温存，配偶却意外提前归家。空气瞬间凝固，然而对方眼中闪烁的并非怒火，而是一种幽暗的渴望。描写这一刻三人之间诡谲流动的张力，以及那句出人意料的邀约。"
+  },
+  {
+    "date": "2026-01-13",
+    "week_cn": "星期二",
+    "date_jp": "<ruby>一月十三日<rt>いちがつじゅうさんにち</rt></ruby>（<ruby>火曜日<rt>かようび</rt></ruby>）",
+    "date_fr": "Mardi treize Janvier",
+    "lunar": "冬月廿五",
+    "en_q": "The best revenge is massive success.",
+    "en_cn": "最好的报复就是取得巨大的成功。",
+    "jp_q": "<ruby>因果応報<rt>いんがおうほう</rt></ruby>。",
+    "jp_cn": "善有善报，恶有恶报。",
+    "fr_q": "La vengeance est un plat qui se mange froid.",
+    "fr_cn": "复仇是一道冷盘（君子报仇十年不晚）。",
+    "jp_ex": "<ruby>電話<rt>でんわ</rt></ruby>を（　）いる<ruby>彼女<rt>かのじょ</rt></ruby>に、うしろからいたずらをしました。 A.して B.し C.している D.した",
+    "jp_ans": "C",
+    "fr_ex": "Il ne faut pas (　) de bruit pendant qu'elle parle au téléphone. A.faisons B.faire C.faites D.fais",
+    "fr_ans": "B",
+    "write_c": "描写在讲电话时那种被窥视的微妙不适感。",
+    "write_a": "伴侣正坐在你腿上与母亲通电话，聊着平庸琐碎的家常。描写你的手如何肆无忌惮地滑进对方的内衣深处。刻画那种声音上的伪装克制与生理上的剧烈反应之间的拉锯。"
+  },
+  {
+    "date": "2026-01-14",
+    "week_cn": "星期三",
+    "date_jp": "<ruby>一月十四日<rt>いちがつじゅうよっか</rt></ruby>（<ruby>水曜日<rt>すいようび</rt></ruby>）",
+    "date_fr": "Mercredi quatorze Janvier",
+    "lunar": "冬月廿六",
+    "en_q": "It always seems impossible until it's done.",
+    "en_cn": "在完成之前，事情总是看起来不可能。",
+    "jp_q": "<ruby>危<rt>あぶ</rt></ruby>ない<ruby>橋<rt>はし</rt></ruby>を<ruby>渡<rt>わた</rt></ruby>る。",
+    "jp_cn": "铤而走险。",
+    "fr_q": "Vouloir, c'est pouvoir.",
+    "fr_cn": "有志者事竟成。",
+    "jp_ex": "<ruby>彼<rt>かれ</rt></ruby>の<ruby>説得<rt>せっとく</rt></ruby>の（　）、バックステージに<ruby>入<rt>い</rt></ruby>れました。 A.おかげで B.せいで C.ために D.くらい",
+    "jp_ans": "A",
+    "fr_ex": "Le garde (　) de me laisser passer. A.vient B.vienne C.venir D.venu",
+    "fr_ans": "A",
+    "write_c": "描写一场你曾去过的演唱会中，最狂热的一个瞬间。",
+    "write_a": "在震耳欲聋的重金属乐与疯狂的人群背后，你将后台那位人高马大的安保人员诱入阴暗转角。描写他坚硬的制服布料与你柔软躯体之间的碰撞，以及为了换取特权，你如何用手段瓦解他的理智。"
+  },
+  {
+    "date": "2026-01-15",
+    "week_cn": "星期四",
+    "date_jp": "<ruby>一月十五日<rt>いちがつじゅうごにち</rt></ruby>（<ruby>木曜日<rt>もくようび</rt></ruby>）",
+    "date_fr": "Jeudi quinze Janvier",
+    "lunar": "冬月廿七",
+    "en_q": "Don't count the days, make the days count.",
+    "en_cn": "不要数着日子过，要让日子过得有意义。",
+    "jp_q": "<ruby>情<rt>なさ</rt></ruby>けは<ruby>人<rt>ひと</rt></ruby>のためならず。",
+    "jp_cn": "予人玫瑰，手有余香（善有善报）。",
+    "fr_q": "Le bonheur est la seule chose qui se double si on le partage.",
+    "fr_cn": "幸福是唯一在分享时会倍增的东西。",
+    "jp_ex": "<ruby>秘密<rt>ひみつ</rt></ruby>を（　）かわりに、サービスを<ruby>要求<rt>ようきゅう</rt></ruby>しました。 A.まもる B.まもって C.まもれば D.まもら",
+    "jp_ans": "A",
+    "fr_ex": "Si tu ne veux pas que je le (　), écoute-moi ! A.dis B.dise C.dira D.disais",
+    "fr_ans": "B",
+    "write_c": "如果你能以秘密换取一件东西，你会换什么？",
+    "write_a": "你意外撞见了那个平日里道貌岸然的竞争对手的出轨现场。描写那一刻你如何从惊愕转为玩味，指尖摩挲着对方领口，低声开出一个名为“缄默”的感官价码。刻画这种将强者彻底掌控的快感。"
+  },
+  {
+    "date": "2026-01-16",
+    "week_cn": "星期五",
+    "date_jp": "<ruby>一月十六日<rt>いちがつじゅうろくにち</rt></ruby>（<ruby>金曜日<rt>きんようび</rt></ruby>）",
+    "date_fr": "Vendredi seize Janvier",
+    "lunar": "冬月廿八",
+    "en_q": "Imagination is the beginning of creation.",
+    "en_cn": "想象力是创造的开始。",
+    "jp_q": "<ruby>想像<rt>そうぞう</rt></ruby>は<ruby>創造<rt>そうぞう</rt></ruby>の<ruby>源<rt>みなもと</rt></ruby>なり。",
+    "jp_cn": "想象力是创造之源。",
+    "fr_q": "L'imagination est plus importante que le savoir.",
+    "fr_cn": "想象力比知识更重要。",
+    "jp_ex": "<ruby>不思議<rt>ふしぎ</rt></ruby>な（　）に、<ruby>願<rt>ねが</rt></ruby>いごとがかないました。 A.こと B.もの C.わけ D.ところ",
+    "jp_ans": "A",
+    "fr_ex": "Je (　) un vœu si j'avais une lampe magique. A.fais B.ferais C.ferai D.faisais",
+    "fr_ans": "B",
+    "write_c": "如果你能向灯神许一个关于“感官体验”的愿望，会是什么？",
+    "write_a": "当你擦拭那只布满灰尘的古董瓶时，一个妖冶的生灵凭空而现。描写它（或他/她）如何缠绕在你背后，承诺为你提供三次极致的欢愉。刻画那虚幻的触碰如何比真实更让你颤栗。"
+  },
+  {
+    "date": "2026-01-17",
+    "week_cn": "星期六",
+    "date_jp": "<ruby>一月十七日<rt>いちがつじゅうななにち</rt></ruby>（<ruby>土曜日<rt>どようび</rt></ruby>）",
+    "date_fr": "Samedi dix-sept Janvier",
+    "lunar": "腊月初一 · 春节",
+    "en_q": "Every day is a gift.",
+    "en_cn": "每一天都是一份礼物。",
+    "jp_q": "<ruby>笑<rt>わら</rt></ruby>う<ruby>門<rt>かど</rt></ruby>には<ruby>福<rt>ふく</rt></ruby><ruby>来<rt>きた</rt></ruby>る。",
+    "jp_cn": "新年新气象。",
+    "fr_q": "C'est la vie !",
+    "fr_cn": "这就是生活！",
+    "jp_ex": "<ruby>誕生<rt>たんじょう</rt></ruby><ruby>日<rt>び</rt></ruby>の（　）に、<ruby>特別<rt>とくべつ</rt></ruby>な夜を過ごしました。 A.ため B.おかげ C.お祝い D.ついで",
+    "jp_ans": "C",
+    "fr_ex": "C'est mon anniversaire, je (　) une fête. A.organise B.organises C.organiser D.organisez",
+    "fr_ans": "A",
+    "write_c": "记录春节第一天的家宴细节。",
+    "write_a": "这是你的生日夜。描写你如何在独处的浴缸里，用红酒与香氛策划一场自我奖赏。刻画指尖滑过温热皮肤时的纹理，以及那种将整个身体献祭给此刻宁静的深度快感。"
+  },
+  {
+    "date": "2026-01-18",
+    "week_cn": "星期日",
+    "date_jp": "<ruby>一月十八日<rt>いちがつじゅうはちにち</rt></ruby>（<ruby>日曜日<rt>にちようび</rt></ruby>）",
+    "date_fr": "Dimanche dix-huit Janvier",
+    "lunar": "腊月初二",
+    "en_q": "The best is yet to come.",
+    "en_cn": "最好的尚未来临。",
+    "jp_q": "<ruby>千里<rt>せんり</rt></ruby>の<ruby>道<rt>みち</rt></ruby>も<ruby>一歩<rt>いっぽ</rt></ruby>から。",
+    "jp_cn": "千里之行始于足下。",
+    "fr_q": "Mieux vaut tard que jamais.",
+    "fr_cn": "迟做总比不做好。",
+    "jp_ex": "<ruby>間違<rt>まちが</rt></ruby>えてメッセージを（　）しまいました。 A.おくって B.おくり C.おくる D.おくれば",
+    "jp_ans": "A",
+    "fr_ex": "Elle m'a envoyé un message (　) je n'attendais pas. A.que B.qui C.dont D.où",
+    "fr_ans": "A",
+    "write_c": "描写一次由于误传信息导致的搞笑尴尬。",
+    "write_a": "你换了新号码，在告知恋人前决定玩个危险的游戏。描写你发出的第一条充满暗示的挑逗信息，以及等待对方猜测“我是谁”时，那种如同猫鼠博弈般的心理拉锯与生理燥热。"
+  },
+  {
+    "date": "2026-01-19",
+    "week_cn": "星期一",
+    "date_jp": "<ruby>一月十九日<rt>いちがつじゅうくにち</rt></ruby>（<ruby>月曜日<rt>げつようび</rt></ruby>）",
+    "date_fr": "Lundi dix-neuf Janvier",
+    "lunar": "腊月初三",
+    "en_q": "Courage is grace under pressure.",
+    "en_cn": "勇气是压力下的优雅。",
+    "jp_q": "<ruby>虎穴<rt>こけつ</rt></ruby>に<ruby>入<rt>い</rt></ruby>らずんば<ruby>虎子<rt>こじ</rt></ruby>を<ruby>得<rt>え</rt></ruby>ず。",
+    "jp_cn": "不入虎穴，焉得虎子。",
+    "fr_q": "Vouloir, c'est pouvoir.",
+    "fr_cn": "有志者事竟成。",
+    "jp_ex": "<ruby>優勝<rt>ゆうしょう</rt></ruby>する（　）に、彼は必死に努力しています。 A.ため B.こと C.はず D.もの",
+    "jp_ans": "A",
+    "fr_ex": "Il est déterminé (　) gagner ce prix. A.à B.de C.pour D.par",
+    "fr_ans": "A",
+    "write_c": "如果你参加一档竞技真人秀，你会展现什么才华？",
+    "write_a": "在一场名为“欲望竞赛”的禁忌真人秀中。描写摄像机红灯闪烁下，你如何被迫在透明玻璃后展现那些极其私密的技巧。刻画那种被千万观众隔着屏幕审视时，产生的、濒临崩溃的羞耻快感。"
+  },
+  {
+    "date": "2026-01-20",
+    "week_cn": "星期二",
+    "date_jp": "<ruby>一月二十日<rt>いちがつはつか</rt></ruby>（<ruby>火曜日<rt>かようび</rt></ruby>）",
+    "date_fr": "Mardi vingt Janvier",
+    "lunar": "腊月初四 · 大寒",
+    "en_q": "Simplicity is the ultimate sophistication.",
+    "en_cn": "简约是极致的复杂。",
+    "jp_q": "<ruby>和敬静寂<rt>わけいせいじゃく</rt></ruby>。",
+    "jp_cn": "和敬清寂。",
+    "fr_q": "La simplicité est la sophistication suprême.",
+    "fr_cn": "简约是极致的复杂。",
+    "jp_ex": "<ruby>子供<rt>こども</rt></ruby>たちが（　）あいだに、二人は密会しました。 A.ねている B.ねる C.ねた D.ねれば",
+    "jp_ans": "A",
+    "fr_ex": "Nous (　) une personne pour animer la fête. A.avons engagé B.engageons C.engagerons D.engagions",
+    "fr_ans": "A",
+    "write_c": "记录大寒节气中，街道两旁的景色变化。",
+    "write_a": "在朋友家喧闹的孩子生日会背后。描写你在阴暗的储藏间里，如何与那个负责表演的受雇者纠缠在一起。刻画门外天真无邪的欢笑声与门内浓烈黏腻的汗水味形成的诡异反差。"
+  },
+  {
+    "date": "2026-01-21",
+    "week_cn": "星期三",
+    "date_jp": "<ruby>一月二十一日<rt>いちがつにじゅういちにち</rt></ruby>（<ruby>水曜日<rt>すいようび</rt></ruby>）",
+    "date_fr": "Mercredi vingt et un Janvier",
+    "lunar": "腊月初五",
+    "en_q": "Life is what happens when you're busy making other plans.",
+    "en_cn": "生活就是当你忙于制定其他计划时发生的事。",
+    "jp_q": "<ruby>案<rt>あん</rt></ruby>ずるより<ruby>産<rt>う</rt></ruby>むが<ruby>易<rt>やす</rt></ruby>し。",
+    "jp_cn": "车到山前必有路。",
+    "fr_q": "La vie est pleine de surprises.",
+    "fr_cn": "生活充满了惊喜。",
+    "jp_ex": "知らない人（　）メッセージが届きました。 A.から B.を C.に D.で",
+    "jp_ans": "A",
+    "fr_ex": "Je suis curieux de (　) plus sur lui. A.savoir B.connaître C.apprendre D.comprendre",
+    "fr_ans": "A",
+    "write_c": "描写一个错误的手机通知带来的惊喜。",
+    "write_a": "你的手机突然弹出一个陌生号码发送的、分辨率极高的私密局部特写。描写那一刻你视觉上的冲击感，以及那种明知道是误传、却忍不住回拨电话时的道德沦丧感。"
+  },
+  {
+    "date": "2026-01-22",
+    "week_cn": "星期四",
+    "date_jp": "<ruby>一月二十二日<rt>いちがつにじゅうふつか</rt></ruby>（<ruby>木曜日<rt>もくようび</rt></ruby>）",
+    "date_fr": "Jeudi vingt-deux Janvier",
+    "lunar": "腊月初六",
+    "en_q": "The secret of getting ahead is getting started.",
+    "en_cn": "领先的秘诀在于开始。",
+    "jp_q": "<ruby>習<rt>なら</rt></ruby>うより<ruby>慣<rt>な</rt></ruby>れろ。",
+    "jp_cn": "熟能生巧。",
+    "fr_q": "Petit à petit, l'oiseau fait son nid.",
+    "fr_cn": "不积跬步，无以至千里。",
+    "jp_ex": "<ruby>上司<rt>じょうし</rt></ruby>が（　）ところを偶然見てしまいました。 A.している B.した C.し D.しよう",
+    "jp_ans": "A",
+    "fr_ex": "Je l'ai vu (　) il travaillait tard. A.quand B.pendant C.alors que D.depuis",
+    "fr_ans": "C",
+    "write_c": "描写办公室里深夜不灭的一盏灯。",
+    "write_a": "深夜加完班，你正准备向上司道别，却撞见那个一向严谨的上司正反锁房门自娱自乐。描写百叶窗缝隙中泄露的光影，以及你如何在惊愕中生出一种想要推门而入、取而代之的野心。"
+  },
+  {
+    "date": "2026-01-23",
+    "week_cn": "星期五",
+    "date_jp": "<ruby>一月二十三日<rt>いちがつにじゅうさんにち</rt></ruby>（<ruby>金曜日<rt>きんようび</rt></ruby>）",
+    "date_fr": "Vendredi vingt-trois Janvier",
+    "lunar": "腊月初七",
+    "en_q": "A picture is worth a thousand words.",
+    "en_cn": "百闻不如一见（画重千言）。",
+    "jp_q": "<ruby>初心<rt>しょしん</rt></ruby><ruby>忘<rt>わす</rt></ruby>るべからず。",
+    "jp_cn": "莫忘初心。",
+    "fr_q": "Vouloir, c'est pouvoir.",
+    "fr_cn": "有志者事竟成。",
+    "jp_ex": "ベッドに（　）れている姿を見て驚きました。 A.つなが B.つながって C.つながる D.つなぎ",
+    "jp_ans": "A",
+    "fr_ex": "Elle m'a demandé (　) j'allais bien. A.si B.que C.de D.pour",
+    "fr_ans": "A",
+    "write_c": "描写一个当你推开家门时最意想不到的画面。",
+    "write_a": "当你推门进屋，却发现情人正赤裸地被锁在床头，姿态极其狼狈且诱人。描写他眼神中的局促与渴求，以及你在慢条斯理地解开自己的外套时，那种居高临下的掌控感。"
+  },
+  {
+    "date": "2026-01-24",
+    "week_cn": "星期六",
+    "date_jp": "<ruby>一月二十四日<rt>いちがつにじゅうよっか</rt></ruby>（<ruby>土曜日<rt>どようび</rt></ruby>）",
+    "date_fr": "Samedi vingt-quatre Janvier",
+    "lunar": "腊月初八 · 腊八节",
+    "en_q": "Success is the sum of small efforts repeated day in and day out.",
+    "en_cn": "成功就是日复一日小努力的积累。",
+    "jp_q": "<ruby>継続<rt>けいぞく</rt></ruby>は<ruby>力<rt>ちから</rt></ruby>なり。",
+    "jp_cn": "坚持就是力量。",
+    "fr_q": "Après la pluie, le beau temps.",
+    "fr_cn": "雨过天晴。",
+    "jp_ex": "<ruby>写真<rt>しゃしん</rt></ruby>の（　）に、おもちゃが映っていました。 A.うしろ B.まえ C.なか D.そば",
+    "jp_ans": "A",
+    "fr_ex": "Je n'avais pas remarqué (　) cet objet était là. A.que B.qui C.dont D.où",
+    "fr_ans": "A",
+    "write_c": "描写一碗热气腾腾的腊八粥及其香味。",
+    "write_a": "你发布了一张自拍到动态中，直到有评论点破，你才发现背景里那件极具羞辱意味的玩具正赫然入目。描写那一刻你指尖飞速想要撤回时的冷汗，以及内心深处某种渴望被人窥探的自虐快感。"
+  },
+  {
+    "date": "2026-01-25",
+    "week_cn": "星期日",
+    "date_jp": "<ruby>一月二十五日<rt>いちがつにじゅうごにち</rt></ruby>（<ruby>日曜日<rt>にちようび</rt></ruby>）",
+    "date_fr": "Dimanche vingt-cinq Janvier",
+    "lunar": "腊月初九",
+    "en_q": "Everything you can imagine is real.",
+    "en_cn": "你所能想象的一切都是真实的。",
+    "jp_q": "<ruby>百聞<rt>ひゃくぶん</rt></ruby>は<ruby>一見<rt>いっけん</rt></ruby>にしかず。",
+    "jp_cn": "百闻不如一见。",
+    "fr_q": "La vie est un voyage, pas une destination.",
+    "fr_cn": "生活是一场旅行，而非目的地。",
+    "jp_ex": "<ruby>朝<rt>あさ</rt></ruby><ruby>起<rt>お</rt></ruby>きたら、<ruby>性別<rt>せいべつ</rt></ruby>が（　）いました。 A.かわって B.かわり C.かえる D.かえれば",
+    "jp_ans": "A",
+    "fr_ex": "Si je (　) une femme, je ferais cela. A.suis B.serais C.étais D.serai",
+    "fr_ans": "C",
+    "write_c": "描写一个身份互换的奇异梦想。",
+    "write_a": "清晨醒来，你惊恐地发现自己的生理性别完全倒置。描写当你颤抖着手探索这副全然陌生、却充满崭新敏感度的躯体时，那种原始而剧烈的感官觉醒。"
+  },
+  {
+    "date": "2026-01-26",
+    "week_cn": "星期一",
+    "date_jp": "<ruby>一月二十六日<rt>いちがつにじゅうろくにち</rt></ruby>（<ruby>月曜日<rt>げつようび</rt></ruby>）",
+    "date_fr": "Lundi vingt-six Janvier",
+    "lunar": "腊月初十",
+    "en_q": "A friend is someone who gives you total freedom to be yourself.",
+    "en_cn": "朋友就是给你完全自由做自己的人。",
+    "jp_q": "<ruby>一期一会<rt>いちごいちえ</rt></ruby>。",
+    "jp_cn": "珍惜每一次相遇。",
+    "fr_q": "Mieux vaut tard que jamais.",
+    "fr_cn": "迟做总比不做好。",
+    "jp_ex": "<ruby>昔<rt>むかし</rt></ruby>の<ruby>友達<rt>ともだち</rt></ruby>から（　）が届きました。 A.メッセージ B.はがき C.しらせ D.こと",
+    "jp_ans": "A",
+    "fr_ex": "Nous nous sommes (　) sur Facebook. A.retrouvés B.retrouvé C.retrouvées D.retrouvée",
+    "fr_ans": "A",
+    "write_c": "描写再次见到多年未见的好友时的第一感受。",
+    "write_a": "多年未见的老友突然发来一条带挑逗意味的加密信息。描写在约见面的咖啡馆里，桌子下那只缓慢探向你膝盖的、带有老茧却极其温柔的手，如何瞬间点燃了跨越十年的暗恋之火。"
+  },
+  {
+    "date": "2026-01-27",
+    "week_cn": "星期二",
+    "date_jp": "<ruby>一月二十七日<rt>いちがつにじゅうななにち</rt></ruby>（<ruby>火曜日<rt>かようび</rt></ruby>）",
+    "date_fr": "Mardi vingt-sept Janvier",
+    "lunar": "腊月十一",
+    "en_q": "Success is walking from failure to failure with no loss of enthusiasm.",
+    "en_cn": "成功是从失败迈向失败，而不丧失热情。",
+    "jp_q": "<ruby>急<rt>いそ</rt></ruby>がば<ruby>回<rt>まわ</rt></ruby>れ。",
+    "jp_cn": "欲速则不达。",
+    "fr_q": "Rien n'est impossible à celui qui veut.",
+    "fr_cn": "世上无难事，只怕有心人。",
+    "jp_ex": "<ruby>同僚<rt>どうりょう</rt></ruby>の（　）は、うそではありませんでした。 A.じまん B.はなし C.うわさ D.こと",
+    "jp_ans": "A",
+    "fr_ex": "Il se vante (　) ses prouesses. A.de B.à C.pour D.par",
+    "fr_ans": "A",
+    "write_c": "描写一个总是夸夸其谈的人及其破绽。",
+    "write_a": "那个总是吹嘘自己能力出众的同事正躲在员工洗手间自娱自乐。描写你如何推门而入，用极其专业且冷酷的技巧瓦解他的假面具。刻画那种将傲慢者彻底碾碎在感官陷阱里的成就感。"
+  },
+  {
+    "date": "2026-01-28",
+    "week_cn": "星期三",
+    "date_jp": "<ruby>一月二十八日<rt>いちがつにじゅうはちにち</rt></ruby>（<ruby>水曜日<rt>すいようび</rt></ruby>）",
+    "date_fr": "Mercredi vingt-huit Janvier",
+    "lunar": "腊月十二",
+    "en_q": "Life is either a daring adventure or nothing at all.",
+    "en_cn": "生活要么是一场冒险，要么一无所有。",
+    "jp_q": "<ruby>聞<rt>き</rt></ruby>くは<ruby>一時<rt>いっとき</rt></ruby>の<ruby>恥<rt>はじ</rt></ruby>、<ruby>聞<rt>き</rt></ruby>かぬは<ruby>一生<rt>いっしょう</rt></ruby>の<ruby>恥<rt>はじ</rt></ruby>。",
+    "jp_cn": "不懂装懂，贻害无穷。",
+    "fr_q": "La vie est belle.",
+    "fr_cn": "生活是美好的。",
+    "jp_ex": "（　）のために、<ruby>面接<rt>めんせつ</rt></ruby>を<ruby>行<rt>おこな</rt></ruby>いました。 A.オーディション B.テスト C.れんしゅう D.しあい",
+    "jp_ans": "A",
+    "fr_ex": "Je cherche quelqu'un (　) m'accompagner. A.pour B.de C.à D.par",
+    "fr_ans": "A",
+    "write_c": "如果你能赢得一张去往月球的门票，你会带谁？",
+    "write_a": "你赢得了一张通往极乐岛的双人门票。描写你在酒店房间里，对那几位候选者进行的“感官面试”。刻画那种谁最能让你失去理智、谁就能获得通行权的残酷且诱惑的规则。"
+  },
+  {
+    "date": "2026-01-29",
+    "week_cn": "星期四",
+    "date_jp": "<ruby>一月二十九日<rt>いちがつにじゅうくにち</rt></ruby>（<ruby>木曜日<rt>もくようび</rt></ruby>）",
+    "date_fr": "Jeudi vingt-neuf Janvier",
+    "lunar": "腊月十三",
+    "en_q": "Happiness depends upon ourselves.",
+    "en_cn": "幸福取决于我们自己。",
+    "jp_q": "<ruby>笑<rt>わら</rt></ruby>う<ruby>門<rt>かど</rt></ruby>には<ruby>福<rt>ふく</rt></ruby><ruby>来<rt>きた</rt></ruby>る。",
+    "jp_cn": "笑口常开。",
+    "fr_q": "La nuit porte conseil.",
+    "fr_cn": "黑夜能给人智慧。",
+    "jp_ex": "はじめての（　）は、とても<ruby>緊張<rt>きんちょう</rt></ruby>しました。 A.けいけん B.こと C.もの D.わけ",
+    "jp_ans": "A",
+    "fr_ex": "C'est la première fois qu'il (　) cela. A.fait B.fasse C.fera D.faisait",
+    "fr_ans": "A",
+    "write_c": "描写第一次尝试新事物的心理活动。",
+    "write_a": "描写那场发生在高热状态下的初体验。侧重描写你对疼痛与愉悦边界的模糊认知，以及对方身上那股浓烈的、几乎要将你灵魂吞噬的成年男性的气息。"
+  },
+  {
+    "date": "2026-01-30",
+    "week_cn": "星期五",
+    "date_jp": "<ruby>一月三十日<rt>いちがつさんじゅうにち</rt></ruby>（<ruby>金曜日<rt>きんようび</rt></ruby>）",
+    "date_fr": "Vendredi trente Janvier",
+    "lunar": "腊月十四",
+    "en_q": "Be the change you wish to see in the world.",
+    "en_cn": "欲变世界，先变自身。",
+    "jp_q": "<ruby>習<rt>なら</rt></ruby>うより<ruby>慣<rt>な</rt></ruby>れろ。",
+    "jp_cn": "熟能生巧。",
+    "fr_q": "Vouloir, c'est pouvoir.",
+    "fr_cn": "有志者事竟成。",
+    "jp_ex": "<ruby>相手<rt>あいて</rt></ruby>の（　）についていけませんでした。 A.ようぼう B.こと C.もの D.わけ",
+    "jp_ans": "A",
+    "fr_ex": "Il veut essayer quelque chose de (　). A.nouveau B.nouveaux C.nouvel D.nouvelle",
+    "fr_ans": "A",
+    "write_c": "如果你需要拒绝某项你不喜欢的提议，你会怎么说？",
+    "write_a": "伴侣突然提出了一个让你感到极度羞耻的特殊要求。描写你内心挣扎的过程——一边是生理上的抗拒，另一边却是当对方强硬地将那些冰冷的皮革具扣在你手腕上时，你无法抑制的战栗。"
+  },
+  {
+    "date": "2026-01-31",
+    "week_cn": "星期六",
+    "date_jp": "<ruby>一月三十一日<rt>いちがつさんじゅういちにち</rt></ruby>（<ruby>土曜日<rt>どようび</rt></ruby>）",
+    "date_fr": "Samedi trente et un Janvier",
+    "lunar": "腊月十五",
+    "en_q": "The best is yet to come.",
+    "en_cn": "最好的尚未来临。",
+    "jp_q": "<ruby>果報<rt>かほう</rt></ruby>は<ruby>寝<rt>ね</rt></ruby>て<ruby>待<rt>ま</rt></ruby>て。",
+    "jp_cn": "听天由命（顺其自然）。",
+    "fr_q": "Après la pluie, le beau temps.",
+    "fr_cn": "雨过天晴。",
+    "jp_ex": "<ruby>夫<rt>おっと</rt></ruby>が（　）かもしれないと疑っています。 A.ゲイ B.びょうき C.こと D.もの",
+    "jp_ans": "A",
+    "fr_ex": "J'imagine qu'il (　) d'autres intérêts. A.ait B.a C.avait D.aura",
+    "fr_ans": "B",
+    "write_c": "记录一个月末总结及对二月的期许。",
+    "write_a": "你偶然发现了丈夫电脑里极其私密的收藏。描写你如何从最初的震惊，转变为在深夜里通过幻想他被那个阳刚好友肆意摆布的模样，从而获得了一种前所未有的、几乎要把你烧焦的自渎快感。"
+  }
+];
+
+let currentShowingDate = "2026-01-01";
+let userStorage = JSON.parse(localStorage.getItem('cal_progress_2026')) || {};
+
+function init() {
+    renderCalendarNav();
+    loadDate(currentShowingDate);
+}
+
+function loadDate(dStr) {
+    currentShowingDate = dStr;
+    const data = calendarData.find(x => x.date === dStr);
+    if(!data) return;
+    const saved = userStorage[dStr] || {};
+
+    // 头部
+    document.getElementById('date-cn').innerText = `${data.date.split('-')[1]}月${data.date.split('-')[2]}日 ${data.week_cn || ''}`;
+    document.getElementById('date-lang-sub').innerHTML = `${data.date_fr}<br>${data.date_jp}`;
+    document.getElementById('lunar-info').innerText = data.lunar;
+
+    // 名言与汉译
+    document.getElementById('en_q').innerText = data.en_q;
+    document.getElementById('en_cn').innerText = data.en_cn || "";
+    document.getElementById('jp_q').innerHTML = data.jp_q;
+    document.getElementById('jp_cn').innerText = data.jp_cn || "";
+    document.getElementById('fr_q').innerText = data.fr_q;
+    document.getElementById('fr_cn').innerText = data.fr_cn || "";
+
+    renderFlexibleEx('jp', data.jp_ex, data.jp_ans, saved);
+    renderFlexibleEx('fr', data.fr_ex, data.fr_ans, saved);
+
+    document.getElementById('write_c_q').innerText = data.write_c;
+    document.getElementById('write_c_input').value = saved.write_c || '';
+    document.getElementById('write_a_q').innerText = data.write_a;
+    document.getElementById('write_a_input').value = saved.write_a || '';
+    
+    document.getElementById('adult-content').style.display = 'none';
+    renderCalendarNav();
+}
+
+function renderFlexibleEx(lang, rawEx, correctAns, saved) {
+    const qEl = document.getElementById(lang + '_ex_q');
+    const area = document.getElementById(lang + '_input_area');
+    area.innerHTML = '';
+    
+    if (rawEx.includes('A.')) {
+        const question = rawEx.split(/[A-D]\./)[0];
+        const opts = rawEx.match(/[A-D]\.[^A-D]+/g) || [];
+        qEl.innerHTML = question;
+        
+        const grid = document.createElement('div');
+        grid.className = 'options-grid';
+        opts.forEach(optStr => {
+            const btn = document.createElement('button');
+            btn.className = 'opt-btn';
+            btn.innerText = optStr.trim();
+            const char = optStr.trim().charAt(0);
+            
+            if(saved[lang + '_choice']) {
+                if(char === correctAns) btn.classList.add('correct');
+                if(saved[lang + '_choice'] === char && char !== correctAns) btn.classList.add('wrong');
+            } else {
+                btn.onclick = () => {
+                    if(char === correctAns) btn.classList.add('correct');
+                    else {
+                        btn.classList.add('wrong');
+                        Array.from(grid.children).forEach(b => {
+                            if(b.innerText.trim().startsWith(correctAns)) b.classList.add('correct');
+                        });
+                    }
+                    saveCurrentData(lang + '_choice', char);
+                };
+            }
+            grid.appendChild(btn);
+        });
+        area.appendChild(grid);
+    } else {
+        qEl.innerHTML = rawEx;
+        const txt = document.createElement('textarea');
+        txt.value = saved[lang + '_text'] || '';
+        txt.oninput = (e) => saveCurrentData(lang + '_text', e.target.value);
+        
+        const ansBtn = document.createElement('button');
+        ansBtn.innerText = "查看参考答案";
+        ansBtn.style = "margin-top:5px; font-size:11px; cursor:pointer;";
+        const ansDiv = document.createElement('div');
+        ansDiv.className = 'ans-show';
+        ansDiv.innerText = "参考答案：" + correctAns;
+        ansBtn.onclick = () => { ansDiv.style.display = 'block'; };
+        
+        area.appendChild(txt);
+        area.appendChild(ansBtn);
+        area.appendChild(ansDiv);
+    }
+}
+
+function saveCurrentData(key, val) {
+    if(!userStorage[currentShowingDate]) userStorage[currentShowingDate] = {};
+    if(key) userStorage[currentShowingDate][key] = val;
+    userStorage[currentShowingDate].write_c = document.getElementById('write_c_input').value;
+    userStorage[currentShowingDate].write_a = document.getElementById('write_a_input').value;
+    userStorage[currentShowingDate].done = true;
+    localStorage.setItem('cal_progress_2026', JSON.stringify(userStorage));
+    renderCalendarNav();
+}
+
+function toggleAdult() {
+    const c = document.getElementById('adult-content');
+    c.style.display = (c.style.display === 'block') ? 'none' : 'block';
+}
+
+function renderCalendarNav() {
+    const nav = document.getElementById('calendar-view');
+    nav.innerHTML = '';
+    for(let i=1; i<=31; i++) {
+        const dStr = `2026-01-${String(i).padStart(2,'0')}`;
+        const dot = document.createElement('div');
+        dot.className = `cal-dot ${dStr === currentShowingDate ? 'active' : ''}`;
+        if (calendarData.find(x => x.date === dStr)) dot.classList.add('has-data');
+        if (userStorage[dStr]?.done) dot.classList.add('completed');
+        dot.innerText = i;
+        dot.onclick = () => loadDate(dStr);
+        nav.appendChild(dot);
+    }
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
