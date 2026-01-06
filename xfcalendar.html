@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026年刑法学习日历 - 智能错题本版</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a3a8f 0%, #2c5aa0 100%);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .header h1 i {
+            color: #ffd700;
+        }
+        
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 25px;
+        }
+        
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .calendar-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .calendar-header h2 {
+            color: #1a3a8f;
+            font-size: 1.8rem;
+        }
+        
+        .calendar-nav button {
+            background-color: #1a3a8f;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: background-color 0.3s;
+        }
+        
+        .calendar-nav button:hover {
+            background-color: #2c5aa0;
+        }
+        
+        .calendar {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .calendar th {
+            background-color: #f0f5ff;
+            color: #1a3a8f;
+            padding: 12px 0;
+            font-weight: 600;
+        }
+        
+        .calendar td {
+            text-align: center;
+            padding: 15px 5px;
+            border: 1px solid #eaeaea;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .calendar td:hover {
+            background-color: #f0f5ff;
+        }
+        
+        .calendar td.selected {
+            background-color: #1a3a8f;
+            color: white;
+            font-weight: bold;
+            border-radius: 8px;
+        }
+        
+        .calendar td.today {
+            background-color: #ffefd6;
+            color: #d35400;
+            font-weight: bold;
+        }
+        
+        .calendar td.holiday::after {
+            content: "★";
+            color: #e74c3c;
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 10px;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .date-info {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .date-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f5ff;
+        }
+        
+        .date-display {
+            font-size: 1.8rem;
+            color: #1a3a8f;
+            font-weight: bold;
+        }
+        
+        .date-details {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .detail-item {
+            padding: 10px 15px;
+            background-color: #f0f5ff;
+            border-radius: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .detail-item i {
+            color: #1a3a8f;
+            margin-right: 8px;
+        }
+        
+        .law-section, .exercise-section, .review-section {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .section-title {
+            color: #1a3a8f;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f5ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title i {
+            color: #ffd700;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            margin-left: 10px;
+        }
+        
+        .section-subtitle {
+            color: #666;
+            font-size: 0.95rem;
+            margin: -10px 0 20px;
+            padding-left: 35px;
+        }
+        
+        .law-content {
+            background-color: #f9faff;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #1a3a8f;
+            margin-bottom: 15px;
+        }
+        
+        .law-item {
+            margin-bottom: 20px;
+        }
+        
+        .law-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .law-title {
+            font-weight: bold;
+            color: #1a3a8f;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .law-text {
+            line-height: 1.8;
+            color: #333;
+        }
+        
+        .exercise-item, .review-item {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f0f5ff;
+        }
+        
+        .exercise-item:last-child, .review-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .question {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .option {
+            padding: 12px 15px;
+            background-color: #f5f7fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .option:hover {
+            background-color: #edf2ff;
+        }
+        
+        .option.selected {
+            background-color: #d4e3ff;
+            border-left: 4px solid #1a3a8f;
+        }
+        
+        .option.correct {
+            background-color: #e1f7e1;
+            border-left: 4px solid #27ae60;
+        }
+        
+        .option.incorrect {
+            background-color: #ffeaea;
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .blank-input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            width: 100%;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+        
+        .blank-input:focus {
+            outline: none;
+            border-color: #1a3a8f;
+        }
+        
+        .explanation-btn, .check-btn {
+            background-color: #1a3a8f;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: 10px;
+        }
+        
+        .explanation-btn:hover, .check-btn:hover {
+            background-color: #2c5aa0;
+        }
+        
+        .explanation {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+            border-left: 4px solid #3498db;
+        }
+        
+        .explanation.show {
+            display: block;
+        }
+        
+        .result {
+            margin-top: 10px;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+        }
+        
+        .result.correct {
+            background-color: #e1f7e1;
+            color: #27ae60;
+            display: block;
+        }
+        
+        .result.incorrect {
+            background-color: #ffeaea;
+            color: #e74c3c;
+            display: block;
+        }
+        
+        /* 错题复习区增强样式 */
+        .knowledge-point-group {
+            margin-bottom: 30px;
+            border: 1px solid #eaeaea;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .point-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .point-header h4 {
+            margin: 0;
+            color: #495057;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .point-count {
+            background: #6c757d;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+        }
+        
+        .point-questions {
+            padding: 10px;
+        }
+        
+        .no-review {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+        
+        .no-review i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #27ae60;
+        }
+        
+        .no-review p {
+            font-size: 1.1rem;
+        }
+        
+        /* 错题项样式 */
+        .review-item {
+            padding: 18px 20px;
+            border-bottom: 1px solid #f1f3f4;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+        
+        .review-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .review-item:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+        
+        /* 严重程度标记 */
+        .review-item.severity-high {
+            border-left: 5px solid #dc3545;
+            background-color: #fff5f5;
+        }
+        
+        .review-item.severity-medium {
+            border-left: 5px solid #fd7e14;
+            background-color: #fff9f0;
+        }
+        
+        .review-item.severity-low {
+            border-left: 5px solid #20c997;
+        }
+        
+        .question-header {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        
+        .question-index {
+            font-weight: bold;
+            color: #495057;
+            margin-right: 8px;
+            min-width: 25px;
+        }
+        
+        .question-text {
+            flex: 1;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+        
+        /* 徽章样式 */
+        .wrong-badge {
+            display: inline-block;
+            background: #e9ecef;
+            color: #495057;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+        
+        .focus-badge {
+            display: inline-block;
+            background: #dc3545;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-left: 8px;
+            font-weight: bold;
+        }
+        
+        /* 答案区域 */
+        .answer-details {
+            margin: 12px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .answer-row {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: baseline;
+        }
+        
+        .answer-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .answer-label {
+            font-weight: bold;
+            min-width: 80px;
+            color: #495057;
+        }
+        
+        .user-answer {
+            color: #dc3545;
+            font-weight: 500;
+        }
+        
+        .correct-answer {
+            color: #20c997;
+            font-weight: 500;
+        }
+        
+        /* 底部操作区 */
+        .question-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .last-time {
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .remove-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 6px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .remove-btn:hover {
+            background: #5a6268;
+        }
+        
+        .review-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eaeaea;
+        }
+        
+        .btn-outline {
+            background: white;
+            color: #6c757d;
+            border: 1px solid #6c757d;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-outline:hover {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .holiday-tag {
+            display: inline-block;
+            background-color: #ffeaea;
+            color: #e74c3c;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-left: 10px;
+        }
+        
+        .lunar-date {
+            color: #8e44ad;
+            font-weight: 500;
+        }
+        
+        .weekday {
+            color: #d35400;
+        }
+        
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #1a3a8f;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-gavel"></i> 2026年刑法学习日历</h1>
+        <p class="subtitle">每日学习刑法法条，完成习题巩固知识，智能错题本助力司法考试备考</p>
+    </div>
+    
+    <div class="stats-bar">
+        <div class="stat-item">
+            <div class="stat-value" id="total-days">0</div>
+            <div class="stat-label">累计学习</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="total-questions">0</div>
+            <div class="stat-label">今日习题</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="wrong-total">0</div>
+            <div class="stat-label">错题总数</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="focus-questions">0</div>
+            <div class="stat-label">重点错题</div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- 左侧日历部分 -->
+        <div class="calendar-section">
+            <div class="calendar-header">
+                <h2 id="current-month">2026年1月</h2>
+                <div class="calendar-nav">
+                    <button id="prev-month"><i class="fas fa-chevron-left"></i></button>
+                    <button id="next-month"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+            <table class="calendar">
+                <thead>
+                    <tr>
+                        <th>日</th>
+                        <th>一</th>
+                        <th>二</th>
+                        <th>三</th>
+                        <th>四</th>
+                        <th>五</th>
+                        <th>六</th>
+                    </tr>
+                </thead>
+                <tbody id="calendar-body">
+                    <!-- 日历内容通过JavaScript动态生成 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- 右侧主要内容区域 -->
+        <div class="main-content">
+            <!-- 日期信息部分 -->
+            <div class="date-info">
+                <div class="date-header">
+                    <div class="date-display" id="current-date">2026年1月1日</div>
+                    <div class="date-details">
+                        <div class="detail-item"><i class="fas fa-calendar-day"></i> 星期<span id="weekday">四</span></div>
+                        <div class="detail-item"><i class="fas fa-moon"></i> 农历<span id="lunar-date">冬月十二</span></div>
+                        <div class="detail-item"><i class="fas fa-flag"></i> <span id="holiday-info">元旦</span></div>
+                    </div>
+                </div>
+                
+                <div class="law-section">
+                    <div class="section-title">
+                        <i class="fas fa-book-law"></i> 今日刑法法条
+                    </div>
+                    <div class="law-content">
+                        <div class="law-item">
+                            <div class="law-title" id="law-title-1">第一条 【立法宗旨】</div>
+                            <div class="law-text" id="law-text-1">为了惩罚犯罪，保护人民，根据宪法，结合我国同犯罪作斗争的具体经验及实际情况，制定本法。</div>
+                        </div>
+                        <div class="law-item">
+                            <div class="law-title" id="law-title-2">第二条 【本法任务】</div>
+                            <div class="law-text" id="law-text-2">中华人民共和国刑法的任务，是用刑罚同一切犯罪行为作斗争，以保卫国家安全，保卫人民民主专政的政权和社会主义制度，保护国有财产和劳动群众集体所有的财产，保护公民私人所有的财产，保护公民的人身权利、民主权利和其他权利，维护社会秩序、经济秩序，保障社会主义建设事业的顺利进行。</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 习题部分 -->
+            <div class="exercise-section">
+                <div class="section-title">
+                    <i class="fas fa-pencil-alt"></i> 今日刑法习题
+                </div>
+                
+                <div class="exercise-item" id="exercise-1">
+                    <div class="question">1. 刑法的解释技巧中，将刑法条文的含义作扩大范围的解释，称为______解释。</div>
+                    <input type="text" class="blank-input" id="blank-1" placeholder="请输入答案">
+                    <button class="check-btn" id="check-1"><i class="fas fa-check"></i> 检查答案</button>
+                    <div class="result" id="result-1"></div>
+                    <button class="explanation-btn" id="explain-1"><i class="fas fa-lightbulb"></i> 查看解析</button>
+                    <div class="explanation" id="explanation-1">
+                        刑法解释技巧包括文理解释、体系解释、历史解释等。其中，扩大解释是指将刑法条文的含义作扩大范围的解释，但必须在条文用语可能的含义范围内进行，不能超出国民预测可能性。
+                    </div>
+                </div>
+                
+                <div class="exercise-item" id="exercise-2">
+                    <div class="question">2. 下列哪些选项属于刑法的基本原则？（多选）</div>
+                    <div class="options">
+                        <div class="option" data-value="A">A. 罪刑法定原则</div>
+                        <div class="option" data-value="B">B. 刑法面前人人平等原则</div>
+                        <div class="option" data-value="C">C. 罪责刑相适应原则</div>
+                        <div class="option" data-value="D">D. 从旧兼从轻原则</div>
+                    </div>
+                    <button class="check-btn" id="check-2"><i class="fas fa-check"></i> 检查答案</button>
+                    <div class="result" id="result-2"></div>
+                    <button class="explanation-btn" id="explain-2"><i class="fas fa-lightbulb"></i> 查看解析</button>
+                    <div class="explanation" id="explanation-2">
+                        我国刑法的三大基本原则是：罪刑法定原则、刑法面前人人平等原则、罪责刑相适应原则。从旧兼从轻原则是刑法溯及力原则，不是基本原则。
+                    </div>
+                </div>
+                
+                <div class="exercise-item" id="exercise-3">
+                    <div class="question">3. 犯罪客体是指刑法所保护而为犯罪行为所侵害的______。</div>
+                    <div class="options">
+                        <div class="option" data-value="A">A. 社会关系</div>
+                        <div class="option" data-value="B">B. 人身权利</div>
+                        <div class="option" data-value="C">C. 财产权利</div>
+                        <div class="option" data-value="D">D. 国家利益</div>
+                    </div>
+                    <button class="check-btn" id="check-3"><i class="fas fa-check"></i> 检查答案</button>
+                    <div class="result" id="result-3"></div>
+                    <button class="explanation-btn" id="explain-3"><i class="fas fa-lightbulb"></i> 查看解析</button>
+                    <div class="explanation" id="explanation-3">
+                        犯罪客体是指刑法所保护而为犯罪行为所侵害的社会关系。这是犯罪构成要件中的重要概念，与犯罪对象相区别。
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 错题复习部分 -->
+            <div class="review-section">
+                <div class="section-title">
+                    <i class="fas fa-history"></i> 
+                    错题复习
+                    <span class="badge" id="wrong-count">0</span>
+                </div>
+                <div class="section-subtitle" id="review-subtitle">
+                    按知识点分类 | 高频错题已标记
+                </div>
+                <div class="review-list">
+                    <!-- 动态插入错题内容 -->
+                </div>
+                <div class="review-actions" id="review-actions">
+                    <button class="btn-outline" id="clear-all-wrong">
+                        <i class="fas fa-trash"></i> 清空所有错题
+                    </button>
+                    <button class="btn-outline" id="export-wrong">
+                        <i class="fas fa-download"></i> 导出错题
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>本工具仅供学习参考，刑法法条内容以官方公布为准 | 数据更新时间：<span id="current-year">2026</span>年<span id="current-month-footer">1</span>月</p>
+        <p>法条来源：<a href="http://www.npc.gov.cn/zgrdw/npc/lfzt/rlys/2008-08/21/content_1882895.htm" target="_blank">中华人民共和国刑法</a> | 使用本地存储保存您的错题数据</p>
+    </div>
+
+    <script>
+        // ==================== 初始化设置 ====================
+        // 获取真实系统时间作为"当天"
+        const today = new Date();
+        let currentDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+        let currentDay = currentDate.getDate();
+        
+        // 更新页脚年份月份
+        document.getElementById('current-year').textContent = currentYear;
+        document.getElementById('current-month-footer').textContent = currentMonth + 1;
+        
+        // ==================== 2026年法定节假日数据 ====================
+        const holidays2026 = {
+            "1-1": "元旦", "1-2": "元旦", "1-3": "元旦",
+            "2-15": "春节", "2-16": "春节", "2-17": "春节", "2-18": "春节", 
+            "2-19": "春节", "2-20": "春节", "2-21": "春节", "2-22": "春节", "2-23": "春节",
+            "4-4": "清明节", "4-5": "清明节", "4-6": "清明节",
+            "5-1": "劳动节", "5-2": "劳动节", "5-3": "劳动节", "5-4": "劳动节", "5-5": "劳动节",
+            "6-19": "端午节", "6-20": "端午节", "6-21": "端午节",
+            "9-25": "中秋节", "9-26": "中秋节", "9-27": "中秋节",
+            "10-1": "国庆节", "10-2": "国庆节", "10-3": "国庆节", "10-4": "国庆节", 
+            "10-5": "国庆节", "10-6": "国庆节", "10-7": "国庆节"
+        };
+        
+        // 简化版农历数据（实际项目需要更完整的数据）
+        const lunarDates = {
+            // 1月
+            "2026-1-1": "冬月十二", "2026-1-15": "冬月廿六", "2026-1-20": "腊月初一",
+            // 2月
+            "2026-2-1": "腊月十三", "2026-2-10": "腊月廿二", "2026-2-15": "腊月廿七",
+            "2026-2-16": "腊月廿八", "2026-2-17": "腊月廿九", "2026-2-18": "正月初一",
+            "2026-2-19": "正月初二", "2026-2-20": "正月初三", "2026-2-23": "正月初六",
+            // 4月
+            "2026-4-4": "二月十七", "2026-4-5": "二月十八",
+            // 5月
+            "2026-5-1": "三月十四",
+            // 6月
+            "2026-6-19": "五月初五", "2026-6-20": "五月初六",
+            // 9月
+            "2026-9-25": "八月十四", "2026-9-26": "八月十五",
+            // 10月
+            "2026-10-1": "八月二十"
+        };
+        
+        // ==================== 刑法法条数据 ====================
+        const criminalLawArticles = [
+            {title: "第一条 【立法宗旨】", text: "为了惩罚犯罪，保护人民，根据宪法，结合我国同犯罪作斗争的具体经验及实际情况，制定本法。"},
+            {title: "第二条 【本法任务】", text: "中华人民共和国刑法的任务，是用刑罚同一切犯罪行为作斗争，以保卫国家安全，保卫人民民主专政的政权和社会主义制度，保护国有财产和劳动群众集体所有的财产，保护公民私人所有的财产，保护公民的人身权利、民主权利和其他权利，维护社会秩序、经济秩序，保障社会主义建设事业的顺利进行。"},
+            {title: "第三条 【罪刑法定】", text: "法律明文规定为犯罪行为的，依照法律定罪处刑；法律没有明文规定为犯罪行为的，不得定罪处刑。"},
+            {title: "第四条 【法律面前人人平等】", text: "对任何人犯罪，在适用法律上一律平等。不允许任何人有超越法律的特权。"},
+            {title: "第五条 【罪责刑相适应】", text: "刑罚的轻重，应当与犯罪分子所犯罪行和承担的刑事责任相适应。"},
+            {title: "第十三条 【犯罪概念】", text: "一切危害国家主权、领土完整和安全，分裂国家、颠覆人民民主专政的政权和推翻社会主义制度，破坏社会秩序和经济秩序，侵犯国有财产或者劳动群众集体所有的财产，侵犯公民私人所有的财产，侵犯公民的人身权利、民主权利和其他权利，以及其他危害社会的行为，依照法律应当受刑罚处罚的，都是犯罪，但是情节显著轻微危害不大的，不认为是犯罪。"},
+            {title: "第十四条 【故意犯罪】", text: "明知自己的行为会发生危害社会的结果，并且希望或者放任这种结果发生，因而构成犯罪的，是故意犯罪。故意犯罪，应当负刑事责任。"},
+            {title: "第十五条 【过失犯罪】", text: "应当预见自己的行为可能发生危害社会的结果，因为疏忽大意而没有预见，或者已经预见而轻信能够避免，以致发生这种结果的，是过失犯罪。过失犯罪，法律有规定的才负刑事责任。"},
+            {title: "第十六条 【不可抗力和意外事件】", text: "行为在客观上虽然造成了损害结果，但是不是出于故意或者过失，而是由于不能抗拒或者不能预见的原因所引起的，不是犯罪。"},
+            {title: "第十七条 【刑事责任年龄】", text: "已满十六周岁的人犯罪，应当负刑事责任。已满十四周岁不满十六周岁的人，犯故意杀人、故意伤害致人重伤或者死亡、强奸、抢劫、贩卖毒品、放火、爆炸、投放危险物质罪的，应当负刑事责任。已满十二周岁不满十四周岁的人，犯故意杀人、故意伤害罪，致人死亡或者以特别残忍手段致人重伤造成严重残疾，情节恶劣，经最高人民检察院核准追诉的，应当负刑事责任。对依照前三款规定追究刑事责任的不满十八周岁的人，应当从轻或者减轻处罚。因不满十六周岁不予刑事处罚的，责令其父母或者其他监护人加以管教；在必要的时候，依法进行专门矫治教育。"},
+            {title: "第二十条 【正当防卫】", text: "为了使国家、公共利益、本人或者他人的人身、财产和其他权利免受正在进行的不法侵害，而采取的制止不法侵害的行为，对不法侵害人造成损害的，属于正当防卫，不负刑事责任。正当防卫明显超过必要限度造成重大损害的，应当负刑事责任，但是应当减轻或者免除处罚。对正在进行行凶、杀人、抢劫、强奸、绑架以及其他严重危及人身安全的暴力犯罪，采取防卫行为，造成不法侵害人伤亡的，不属于防卫过当，不负刑事责任。"},
+            {title: "第二十一条 【紧急避险】", text: "为了使国家、公共利益、本人或者他人的人身、财产和其他权利免受正在发生的危险，不得已采取的紧急避险行为，造成损害的，不负刑事责任。紧急避险超过必要限度造成不应有的损害的，应当负刑事责任，但是应当减轻或者免除处罚。第一款中关于避免本人危险的规定，不适用于职务上、业务上负有特定责任的人。"}
+        ];
+        
+        // ==================== 智能错题本系统 ====================
+        let wrongQuestions = JSON.parse(localStorage.getItem('criminalLawWrongQuestions')) || [];
+        let studyStats = JSON.parse(localStorage.getItem('criminalLawStudyStats')) || {
+            totalDays: 0,
+            lastStudyDate: null,
+            totalQuestionsAttempted: 0,
+            totalCorrect: 0
+        };
+        
+        // 更新学习统计
+        function updateStudyStats() {
+            const todayStr = today.toDateString();
+            
+            // 如果是新的一天，增加学习天数
+            if (studyStats.lastStudyDate !== todayStr) {
+                studyStats.totalDays++;
+                studyStats.lastStudyDate = todayStr;
+            }
+            
+            studyStats.totalQuestionsAttempted += 3; // 每天3题
+            
+            // 更新统计显示
+            document.getElementById('total-days').textContent = studyStats.totalDays;
+            document.getElementById('total-questions').textContent = '3';
+            document.getElementById('wrong-total').textContent = wrongQuestions.length;
+            
+            // 计算重点错题（错误次数≥3）
+            const focusCount = wrongQuestions.filter(q => q.wrongCount >= 3).length;
+            document.getElementById('focus-questions').textContent = focusCount;
+            
+            // 保存统计
+            localStorage.setItem('criminalLawStudyStats', JSON.stringify(studyStats));
+        }
+        
+        // 记录错题
+        function recordWrongQuestion(questionData) {
+            const { id, questionId, text, userAnswer, correctAnswer, knowledgePoints } = questionData;
+            const now = new Date().toISOString();
+            
+            // 查找是否已存在错题记录
+            const existingIndex = wrongQuestions.findIndex(item => item.id === id);
+            
+            if (existingIndex >= 0) {
+                // 已存在：更新错误次数和时间
+                wrongQuestions[existingIndex].wrongCount += 1;
+                wrongQuestions[existingIndex].lastWrongTime = now;
+                wrongQuestions[existingIndex].userAnswer = userAnswer;
+                console.log(`错题「${text.substring(0, 20)}...」错误次数+1，当前: ${wrongQuestions[existingIndex].wrongCount}次`);
+            } else {
+                // 新错题：创建记录
+                wrongQuestions.push({
+                    id,
+                    questionId,
+                    text,
+                    userAnswer,
+                    correctAnswer,
+                    knowledgePoints: knowledgePoints || ['未分类'],
+                    wrongCount: 1,
+                    lastWrongTime: now,
+                    createdAt: now
+                });
+                console.log(`新错题「${text.substring(0, 20)}...」已收录`);
+            }
+            
+            // 保存到本地存储
+            localStorage.setItem('criminalLawWrongQuestions', JSON.stringify(wrongQuestions));
+            
+            // 刷新显示
+            renderReviewSection();
+            updateStudyStats();
+        }
+        
+        // 按知识点分类
+        function categorizeByKnowledgePoint(questions) {
+            const categorized = {};
+            
+            questions.forEach(q => {
+                q.knowledgePoints.forEach(point => {
+                    if (!categorized[point]) {
+                        categorized[point] = [];
+                    }
+                    // 避免同一题目在不同知识点下重复显示
+                    if (!categorized[point].some(item => item.id === q.id)) {
+                        categorized[point].push(q);
+                    }
+                });
+            });
+            
+            // 如果没有分类，则归为"未分类"
+            if (Object.keys(categorized).length === 0 && questions.length > 0) {
+                categorized['未分类'] = questions;
+            }
+            
+            return categorized;
+        }
+        
+        // 渲染错题复习区
+        function renderReviewSection() {
+            const reviewContainer = document.querySelector('.review-list');
+            const wrongCountElement = document.getElementById('wrong-count');
+            const reviewActions = document.getElementById('review-actions');
+            
+            if (!wrongQuestions || wrongQuestions.length === 0) {
+                reviewContainer.innerHTML = `
+                    <div class="no-review">
+                        <i class="fas fa-check-circle"></i>
+                        <p>暂无错题记录，保持全对状态！</p>
+                        <p style="margin-top:10px;font-size:0.9rem;color:#999;">做错的题目会自动出现在这里</p>
+                    </div>`;
+                wrongCountElement.textContent = '0';
+                reviewActions.style.display = 'none';
+                return;
+            }
+            
+            // 按知识点分类
+            const categorized = categorizeByKnowledgePoint(wrongQuestions);
+            
+            // 生成错题HTML
+            let reviewHTML = '';
+            
+            Object.keys(categorized).forEach(point => {
+                const questions = categorized[point];
+                
+                // 按错误次数和最近时间排序（高频、最近错的靠前）
+                questions.sort((a, b) => {
+                    if (b.wrongCount !== a.wrongCount) return b.wrongCount - a.wrongCount;
+                    return new Date(b.lastWrongTime) - new Date(a.lastWrongTime);
+                });
+                
+                reviewHTML += `
+                    <div class="knowledge-point-group">
+                        <div class="point-header">
+                            <h4><i class="fas fa-tag"></i> ${point}</h4>
+                            <span class="point-count">${questions.length}题</span>
+                        </div>
+                        <div class="point-questions">
+                `;
+                
+                questions.forEach((q, index) => {
+                    // 根据错误次数确定严重程度
+                    const severity = q.wrongCount >= 5 ? 'high' : 
+                                    q.wrongCount >= 3 ? 'medium' : 'low';
+                    
+                    reviewHTML += `
+                        <div class="review-item severity-${severity}" data-id="${q.id}">
+                            <div class="question-header">
+                                <span class="question-index">${index + 1}.</span>
+                                <span class="question-text">${q.text}</span>
+                                <span class="wrong-badge">错${q.wrongCount}次</span>
+                                ${q.wrongCount >= 3 ? '<span class="focus-badge"><i class="fas fa-exclamation-circle"></i> 重点</span>' : ''}
+                            </div>
+                            <div class="answer-details">
+                                <div class="answer-row">
+                                    <span class="answer-label">你的答案：</span>
+                                    <span class="user-answer">${Array.isArray(q.userAnswer) ? q.userAnswer.join('、') : q.userAnswer}</span>
+                                </div>
+                                <div class="answer-row">
+                                    <span class="answer-label">正确答案：</span>
+                                    <span class="correct-answer">${Array.isArray(q.correctAnswer) ? q.correctAnswer.join('、') : q.correctAnswer}</span>
+                                </div>
+                            </div>
+                            <div class="question-footer">
+                                <span class="last-time">
+                                    <i class="far fa-clock"></i>
+                                    最后错误：${formatTime(q.lastWrongTime)}
+                                </span>
+                                <button class="remove-btn" data-id="${q.id}">
+                                    <i class="fas fa-trash-alt"></i> 掌握移除
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                reviewHTML += `</div></div>`;
+            });
+            
+            reviewContainer.innerHTML = reviewHTML;
+            wrongCountElement.textContent = wrongQuestions.length.toString();
+            reviewActions.style.display = 'flex';
+            
+            // 更新统计
+            updateStudyStats();
+            
+            // 绑定移除按钮事件
+            attachRemoveEvents();
+        }
+        
+        // 时间格式化
+        function formatTime(isoString) {
+            const date = new Date(isoString);
+            const now = new Date();
+            const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) return '今天';
+            if (diffDays === 1) return '昨天';
+            if (diffDays < 7) return `${diffDays}天前`;
+            if (diffDays < 30) return `${Math.floor(diffDays/7)}周前`;
+            
+            return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' });
+        }
+        
+        // 绑定移除按钮事件
+        function attachRemoveEvents() {
+            document.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const questionId = this.dataset.id;
+                    removeWrongQuestion(questionId);
+                });
+            });
+        }
+        
+        // 移除错题
+        function removeWrongQuestion(questionId) {
+            const originalLength = wrongQuestions.length;
+            wrongQuestions = wrongQuestions.filter(q => q.id !== questionId);
+            
+            if (wrongQuestions.length < originalLength) {
+                localStorage.setItem('criminalLawWrongQuestions', JSON.stringify(wrongQuestions));
+                renderReviewSection();
+                alert('错题已移除！');
+            }
+        }
+        
+        // 清空所有错题
+        document.getElementById('clear-all-wrong').addEventListener('click', function() {
+            if (wrongQuestions.length === 0) {
+                alert('当前没有错题可清空。');
+                return;
+            }
+            
+            if (confirm(`确定要清空所有 ${wrongQuestions.length} 道错题吗？此操作不可撤销。`)) {
+                wrongQuestions = [];
+                localStorage.setItem('criminalLawWrongQuestions', JSON.stringify(wrongQuestions));
+                renderReviewSection();
+                alert('所有错题已清空！');
+            }
+        });
+        
+        // 导出错题
+        document.getElementById('export-wrong').addEventListener('click', function() {
+            if (wrongQuestions.length === 0) {
+                alert('当前没有错题可导出。');
+                return;
+            }
+            
+            const exportData = {
+                exportDate: new Date().toISOString(),
+                totalQuestions: wrongQuestions.length,
+                wrongQuestions: wrongQuestions
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `刑法错题本_${new Date().toLocaleDateString('zh-CN')}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            alert(`已导出 ${wrongQuestions.length} 道错题！`);
+        });
+        
+        // ==================== 日历系统 ====================
+        function initCalendar() {
+            const monthNames = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
+            document.getElementById("current-month").textContent = `${currentYear}年${monthNames[currentMonth]}`;
+            
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const firstDayIndex = firstDay.getDay();
+            const lastDate = lastDay.getDate();
+            
+            let calendarHTML = "";
+            let day = 1;
+            
+            for (let i = 0; i < 6; i++) {
+                calendarHTML += "<tr>";
+                
+                for (let j = 0; j < 7; j++) {
+                    if (i === 0 && j < firstDayIndex) {
+                        calendarHTML += "<td></td>";
+                    } else if (day > lastDate) {
+                        calendarHTML += "<td></td>";
+                    } else {
+                        const dateStr = `${currentMonth + 1}-${day}`;
+                        const fullDateStr = `${currentYear}-${currentMonth + 1}-${day}`;
+                        const isToday = currentYear === today.getFullYear() && 
+                                        currentMonth === today.getMonth() && 
+                                        day === today.getDate();
+                        const isHoliday = holidays2026[dateStr];
+                        const isSelected = isToday;
+                        
+                        let cellClass = "";
+                        if (isSelected) cellClass += "selected";
+                        if (isToday) cellClass += " today";
+                        if (isHoliday) cellClass += " holiday";
+                        
+                        calendarHTML += `<td class="${cellClass}" data-date="${fullDateStr}" data-day="${day}">${day}</td>`;
+                        day++;
+                    }
+                }
+                
+                calendarHTML += "</tr>";
+                
+                if (day > lastDate) break;
+            }
+            
+            document.getElementById("calendar-body").innerHTML = calendarHTML;
+            
+            // 添加日期点击事件
+            document.querySelectorAll(".calendar td[data-date]").forEach(cell => {
+                cell.addEventListener("click", function() {
+                    document.querySelectorAll(".calendar td.selected").forEach(td => {
+                        td.classList.remove("selected");
+                    });
+                    
+                    this.classList.add("selected");
+                    updateDateInfo(this.dataset.date);
+                });
+            });
+        }
+        
+        // 更新日期信息
+        function updateDateInfo(dateStr) {
+            const date = new Date(dateStr);
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            
+            document.getElementById("current-date").textContent = `${year}年${month}月${day}日`;
+            
+            const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
+            const weekday = weekdays[date.getDay()];
+            document.getElementById("weekday").textContent = weekday;
+            
+            const lunarKey = `${year}-${month}-${day}`;
+            const lunarDate = lunarDates[lunarKey] || "冬月十二";
+            document.getElementById("lunar-date").textContent = lunarDate;
+            
+            const holidayKey = `${month}-${day}`;
+            const holiday = holidays2026[holidayKey] || "工作日";
+            document.getElementById("holiday-info").textContent = holiday;
+            
+            updateLawArticles(day);
+        }
+        
+        // 更新刑法法条
+        function updateLawArticles(day) {
+            const articleIndex1 = (day - 1) % criminalLawArticles.length;
+            const articleIndex2 = (day + 5) % criminalLawArticles.length;
+            
+            const article1 = criminalLawArticles[articleIndex1];
+            const article2 = criminalLawArticles[articleIndex2];
+            
+            document.getElementById("law-title-1").textContent = article1.title;
+            document.getElementById("law-text-1").textContent = article1.text;
+            
+            document.getElementById("law-title-2").textContent = article2.title;
+            document.getElementById("law-text-2").textContent = article2.text;
+        }
+        
+        // 初始化月份导航
+        function initMonthNavigation() {
+            document.getElementById("prev-month").addEventListener("click", function() {
+                currentMonth--;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
+                initCalendar();
+            });
+            
+            document.getElementById("next-month").addEventListener("click", function() {
+                currentMonth++;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                initCalendar();
+            });
+        }
+        
+        // ==================== 习题系统 ====================
+        function initExercises() {
+            // 第一题：填空题
+            document.getElementById("check-1").addEventListener("click", function() {
+                const answer = document.getElementById("blank-1").value.trim();
+                const resultDiv = document.getElementById("result-1");
+                
+                if (answer === "扩大") {
+                    resultDiv.textContent = "✓ 回答正确！";
+                    resultDiv.className = "result correct";
+                } else {
+                    resultDiv.textContent = "✗ 回答错误，正确答案是：扩大";
+                    resultDiv.className = "result incorrect";
+                    
+                    // 记录错题
+                    recordWrongQuestion({
+                        id: `exercise-1-${Date.now()}`,
+                        questionId: 'exercise-1',
+                        text: '刑法的解释技巧中，将刑法条文的含义作扩大范围的解释，称为______解释。',
+                        userAnswer: answer,
+                        correctAnswer: '扩大',
+                        knowledgePoints: ['刑法解释', '总则']
+                    });
+                }
+            });
+            
+            // 第二题：多选题
+            const options2 = document.querySelectorAll("#exercise-2 .option");
+            options2.forEach(option => {
+                option.addEventListener("click", function() {
+                    this.classList.toggle("selected");
+                });
+            });
+            
+            document.getElementById("check-2").addEventListener("click", function() {
+                const selectedOptions = document.querySelectorAll("#exercise-2 .option.selected");
+                const selectedValues = Array.from(selectedOptions).map(opt => opt.dataset.value);
+                
+                const resultDiv = document.getElementById("result-2");
+                
+                const correctAnswers = ["A", "B", "C"];
+                const isCorrect = selectedValues.length === 3 && 
+                                 selectedValues.every(val => correctAnswers.includes(val)) &&
+                                 correctAnswers.every(val => selectedValues.includes(val));
+                
+                if (isCorrect) {
+                    resultDiv.textContent = "✓ 回答正确！";
+                    resultDiv.className = "result correct";
+                    
+                    options2.forEach(option => {
+                        if (correctAnswers.includes(option.dataset.value)) {
+                            option.classList.add("correct");
+                        }
+                        option.classList.remove("selected");
+                    });
+                } else {
+                    resultDiv.textContent = "✗ 回答错误，正确答案是：A、B、C";
+                    resultDiv.className = "result incorrect";
+                    
+                    options2.forEach(option => {
+                        if (correctAnswers.includes(option.dataset.value)) {
+                            option.classList.add("correct");
+                        } else {
+                            option.classList.add("incorrect");
+                        }
+                        option.classList.remove("selected");
+                    });
+                    
+                    // 记录错题
+                    recordWrongQuestion({
+                        id: `exercise-2-${Date.now()}`,
+                        questionId: 'exercise-2',
+                        text: '下列哪些选项属于刑法的基本原则？',
+                        userAnswer: selectedValues,
+                        correctAnswer: correctAnswers,
+                        knowledgePoints: ['刑法基本原则', '总则']
+                    });
+                }
+            });
+            
+            // 第三题：单选题
+            const options3 = document.querySelectorAll("#exercise-3 .option");
+            options3.forEach(option => {
+                option.addEventListener("click", function() {
+                    options3.forEach(opt => {
+                        opt.classList.remove("selected");
+                    });
+                    
+                    this.classList.add("selected");
+                });
+            });
+            
+            document.getElementById("check-3").addEventListener("click", function() {
+                const selectedOption = document.querySelector("#exercise-3 .option.selected");
+                const resultDiv = document.getElementById("result-3");
+                
+                if (selectedOption && selectedOption.dataset.value === "A") {
+                    resultDiv.textContent = "✓ 回答正确！";
+                    resultDiv.className = "result correct";
+                    selectedOption.classList.add("correct");
+                } else {
+                    resultDiv.textContent = "✗ 回答错误，正确答案是：A";
+                    resultDiv.className = "result incorrect";
+                    
+                    options3.forEach(option => {
+                        if (option.dataset.value === "A") {
+                            option.classList.add("correct");
+                        } else if (option.classList.contains("selected")) {
+                            option.classList.add("incorrect");
+                        }
+                    });
+                    
+                    // 记录错题
+                    recordWrongQuestion({
+                        id: `exercise-3-${Date.now()}`,
+                        questionId: 'exercise-3',
+                        text: '犯罪客体是指刑法所保护而为犯罪行为所侵害的______。',
+                        userAnswer: selectedOption ? selectedOption.dataset.value : '未回答',
+                        correctAnswer: 'A',
+                        knowledgePoints: ['犯罪构成', '犯罪客体']
+                    });
+                }
+            });
+            
+            // 解析按钮
+            document.querySelectorAll(".explanation-btn").forEach(btn => {
+                btn.addEventListener("click", function() {
+                    const explanationId = this.id.replace("explain", "explanation");
+                    const explanationDiv = document.getElementById(explanationId);
+                    explanationDiv.classList.toggle("show");
+                    
+                    if (explanationDiv.classList.contains("show")) {
+                        this.innerHTML = '<i class="fas fa-lightbulb"></i> 隐藏解析';
+                    } else {
+                        this.innerHTML = '<i class="fas fa-lightbulb"></i> 查看解析';
+                    }
+                });
+            });
+        }
+        
+        // ==================== 初始化页面 ====================
+        document.addEventListener("DOMContentLoaded", function() {
+            initCalendar();
+            updateDateInfo(`${currentYear}-${currentMonth + 1}-${currentDay}`);
+            initMonthNavigation();
+            initExercises();
+            renderReviewSection();
+            updateStudyStats();
+        });
+    </script>
+</body>
+</html>
