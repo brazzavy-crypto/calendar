@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026年语言学习日历 - 全年365天不同内容</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+            min-height: 100vh;
+        }
+
+        /* 左侧导航面板 */
+        .nav-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        /* 月份选择器 */
+        .month-selector {
+            margin-bottom: 20px;
+        }
+
+        .month-selector h3 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .month-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .month-btn {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .month-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateY(-2px);
+        }
+
+        .month-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            font-weight: bold;
+        }
+
+        /* 当月日历 */
+        .current-month-calendar {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .calendar-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .nav-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #5a67d8;
+            transform: scale(1.1);
+        }
+
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .weekday {
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #667eea;
+            padding: 5px;
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            position: relative;
+        }
+
+        .day:hover {
+            background: #e8ecff;
+            transform: scale(1.1);
+        }
+
+        .day.today {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+
+        .day.selected {
+            background: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+
+        .day.checked {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .day.checked::after {
+            content: '✓';
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            font-size: 10px;
+        }
+
+        .day.other-month {
+            color: #ccc;
+            cursor: default;
+        }
+
+        .day.other-month:hover {
+            background: transparent;
+            transform: none;
+        }
+
+        /* 进度信息 */
+        .progress-info {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .progress-info h4 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        .progress-info p {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            max-height: calc(100vh - 40px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+
+        .header .date-info {
+            font-size: 24px;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .date-subinfo {
+            font-size: 16px;
+            color: #888;
+        }
+
+        .language-tags {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .tag {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        /* 名言卡片 */
+        .quotes-section {
+            margin-bottom: 30px;
+        }
+
+        .quotes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .quote-card {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8ecff 100%);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 5px solid #667eea;
+            transition: transform 0.3s ease;
+        }
+
+        .quote-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .quote-card.english {
+            border-left-color: #FF6B6B;
+        }
+
+        .quote-card.japanese {
+            border-left-color: #4ECDC4;
+        }
+
+        .quote-card.french {
+            border-left-color: #FFD166;
+        }
+
+        .quote-language {
+            font-size: 14px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quote-language::before {
+            content: '💬';
+        }
+
+        .quote-english .quote-language::before { content: '🇬🇧'; }
+        .quote-japanese .quote-language::before { content: '🇯🇵'; }
+        .quote-french .quote-language::before { content: '🇫🇷'; }
+
+        .quote-text {
+            font-size: 16px;
+            margin-bottom: 10px;
+            font-style: italic;
+            color: #333;
+        }
+
+        .quote-author {
+            font-size: 14px;
+            color: #666;
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .quote-translation {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #ccc;
+            font-size: 14px;
+            color: #555;
+            font-style: italic;
+        }
+
+        /* 练习区域 */
+        .exercises-section {
+            margin-bottom: 30px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab:hover {
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .exercise-content {
+            background: #f8f9ff;
+            border-radius: 12px;
+            padding: 25px;
+            min-height: 300px;
+        }
+
+        .exercise-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .exercise-title::before {
+            content: '🎯';
+            font-size: 20px;
+        }
+
+        .exercise-description {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .question-text {
+            font-size: 16px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .option {
+            background: white;
+            border: 2px solid #e0e0e0;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 15px;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateX(5px);
+        }
+
+        .option.correct {
+            border-color: #4CAF50;
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .option.incorrect {
+            border-color: #f44336;
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .answer-section {
+            display: none;
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .answer-section.show {
+            display: block;
+        }
+
+        .answer-title {
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 8px;
+        }
+
+        .input-answer {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 15px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-answer:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .submit-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 创意写作 */
+        .writing-prompt {
+            background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 5px solid #FFD166;
+        }
+
+        .writing-prompt h4 {
+            color: #b38a00;
+            margin-bottom: 10px;
+        }
+
+        .writing-textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px dashed #FFD166;
+            border-radius: 8px;
+            font-size: 15px;
+            resize: vertical;
+            margin: 15px 0;
+        }
+
+        .writing-textarea:focus {
+            outline: none;
+            border-style: solid;
+            border-color: #ffb800;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-panel {
+                position: static;
+            }
+
+            .quotes-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .header .date-info {
+                font-size: 18px;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+
+            .month-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* 滚动条样式 */
+        .main-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .main-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .main-content::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+
+        .main-content::-webkit-scrollbar-thumb:hover {
+            background: #5a67d8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 左侧导航面板 -->
+        <aside class="nav-panel">
+            <!-- 月份选择器 -->
+            <div class="month-selector">
+                <h3>📅 选择月份</h3>
+                <div class="month-grid" id="monthGrid">
+                    <!-- 月份按钮将通过JS生成 -->
+                </div>
+            </div>
+
+            <!-- 当月日历 -->
+            <div class="current-month-calendar">
+                <div class="calendar-header">
+                    <button class="nav-btn" onclick="changeMonth(-1)">‹</button>
+                    <div class="calendar-title" id="calendarTitle">2026年1月</div>
+                    <button class="nav-btn" onclick="changeMonth(1)">›</button>
+                </div>
+                <div class="weekdays" id="weekdays">
+                    <!-- 星期标题将通过JS生成 -->
+                </div>
+                <div class="days-grid" id="daysGrid">
+                    <!-- 日期将通过JS生成 -->
+                </div>
+            </div>
+            
+            <!-- 进度信息 -->
+            <div class="progress-info">
+                <h4>学习进度</h4>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+                <p>已打卡天数：<span id="checkedDays">0</span> / 365</p>
+                <p>连续打卡：<span id="streakDays">0</span> 天</p>
+                <p>完成率：<span id="completionRate">0</span>%</p>
+            </div>
+
+            <div style="margin-top: 20px; padding: 15px; background: #f0f4ff; border-radius: 8px;">
+                <h4 style="font-size: 14px; margin-bottom: 10px;">💡 使用提示</h4>
+                <ul style="font-size: 12px; color: #666; line-height: 1.5;">
+                    <li>• 点击月份快速切换</li>
+                    <li>• 使用箭头切换上下月</li>
+                    <li>• 点击日期查看内容</li>
+                    <li>• 绿色✓表示已打卡</li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- 主内容区域 -->
+        <main class="main-content" id="mainContent">
+            <div class="header fade-in">
+                <h1>🌍 多语言学习日历 2026</h1>
+                <div class="date-info" id="dateInfo">2026年1月1日</div>
+                <div class="date-subinfo" id="dateSubInfo">
+                    <span id="weekdayInfo">星期四</span> | 
+                    <span id="lunarInfo">农历十一月十三</span>
+                </div>
+                <div class="language-tags">
+                    <span class="tag">🇬🇧 英语</span>
+                    <span class="tag">🇯🇵 日语</span>
+                    <span class="tag">🇫🇷 法语</span>
+                </div>
+            </div>
+
+            <!-- 每日名言区域 -->
+            <section class="quotes-section fade-in">
+                <h2 style="margin-bottom: 20px; color: #667eea;">📖 每日名言</h2>
+                <div class="quotes-grid" id="quotesGrid">
+                    <!-- 名言卡片将通过JS动态生成 -->
+                </div>
+            </section>
+
+            <!-- 练习区域 -->
+            <section class="exercises-section fade-in">
+                <h2 style="margin-bottom: 20px; color: #667eea;">🎯 每日练习</h2>
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('japanese')">🇯🇵 日语练习</button>
+                    <button class="tab" onclick="switchTab('french')">🇫🇷 法语练习</button>
+                    <button class="tab" onclick="switchTab('writing')">✍️ 创意写作</button>
+                </div>
+
+                <div class="exercise-content" id="exerciseContent">
+                    <!-- 练习内容将通过JS动态生成 -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // 全局变量
+        let currentDate = new Date(2026, 0, 1); // 默认2026年1月1日
+        let currentMonth = 0; // 当前显示的月份
+        let currentYear = 2026;
+        let checkedDates = JSON.parse(localStorage.getItem('checkedDates2026')) || {};
+        let currentTab = 'japanese';
+
+        // 简化的农历数据
+        const lunarMonths = ['正月', '二月', '三月', '四月', '五月', '六月', 
+                            '七月', '八月', '九月', '十月', '十一月', '腊月'];
+        const lunarDays = ['初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
+                          '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
+                          '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十'];
+
+        // 星期名称（多语言）
+        const weekdays = {
+            zh: ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'],
+            fr: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
+            ja: ['にちようび', 'げつようび', 'かようび', 'すいようび', 'もくようび', 'きんようび', 'どようび']
+        };
+
+        // 中文月份名称
+        const monthNames = ['一月', '二月', '三月', '四月', '五月', '六月',
+                           '七月', '八月', '九月', '十月', '十一月', '十二月'];
+
+        // 2026年各月天数
+        const monthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+        // 全年365天不同的内容数据库
+        const dailyContent = {
+            // 1月 - 新年主题
+            1: {
+                quotes: {
+                    english: { text: "The journey of a thousand miles begins with one step.", author: "Lao Tzu", translation: "千里之行，始于足下。" },
+                    japanese: { text: "一年の計は元旦にあり", author: "日本谚语", translation: "一年之计在于春。" },
+                    french: { text: "Chaque jour est une nouvelle vie.", author: "Sénèque", translation: "每一天都是新生命。" }
+                },
+                japanese: { type: "choice", question: "「明けましておめでとう」は英語で何と言いますか？", options: ["Hello", "Happy New Year", "Good morning", "Thank you"], correct: 1, level: "N5", explanation: "「明けましておめでとう」は新年の挨拶で、英語では「Happy New Year」です。" },
+                french: { type: "choice", question: "Comment dit-on « Bonne année » en français ?", options: ["Bonjour", "Bonne année", "Bonsoir", "Merci"], correct: 1, level: "A1", explanation: "新年の挨拶は「Bonne année」です。" },
+                writing: { theme: "新年决心", prompt: "写下你的2026年语言学习目标，包括具体的时间安排和期望达到的水平。" }
+            },
+            2: {
+                quotes: {
+                    english: { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill", translation: "成功不是终点，失败不是致命的：重要的是继续前进的勇气。" },
+                    japanese: { text: "継続は力なり", author: "日本谚语", translation: "坚持就是力量。" },
+                    french: { text: "La persévérance est la clé du succès.", author: "Victor Hugo", translation: "毅力是成功的关键。" }
+                },
+                japanese: { type: "choice", question: "「毎日勉強します」の否定形は？", options: ["毎日勉強しません", "毎日勉強します", "毎日勉強した", "毎日勉強して"], correct: 0, level: "N5", explanation: "動詞の否定形は「～ません」です。" },
+                french: { type: "choice", question: "Comment conjugue le verbe « travailler » au présent de l'indicatif pour « je » ?", options: ["je travaille", "je travailles", "je travail", "je travaillent"], correct: 0, level: "A1", explanation: "第一人称单数は「je travaille」です。" },
+                writing: { theme: "学习习惯", prompt: "描述你每天学习语言的最佳时间和方法，以及如何保持学习动力。" }
+            },
+            3: {
+                quotes: {
+                    english: { text: "The only way to learn a new language is to speak it.", author: "Louis de Funès", translation: "学习新语言的唯一方法就是说出来。" },
+                    japanese: { text: "言語は人を結びつける架け橋である", author: "日本谚语", translation: "语言是连接人们的桥梁。" },
+                    french: { text: "Une langue différente, c'est une vision différente de la vie.", author: "Federico Fellini", translation: "不同的语言就是不同的人生视角。" }
+                },
+                japanese: { type: "choice", question: "「日本語を話します」の敬語表現は？", options: ["日本語を話します", "日本語をお話しします", "日本語を話せます", "日本語を話して"], correct: 1, level: "N4", explanation: "謙譲語で「お～する」形を使います。" },
+                french: { type: "choice", question: "Comment dire « Je parle français » poliment ?", options: ["Je parle français", "Je parle le français", "Je parle français", "Je parle du français"], correct: 0, level: "A2", explanation: "言語を話すときは冠詞を付けません。" },
+                writing: { theme: "语言学习感悟", prompt: "分享你学习新语言过程中最有趣或最困难的经历，以及你从中学到的东西。" }
+            }
+        };
+
+        // 扩展的全年365天内容生成函数
+        function generateFullYearContent() {
+            const content = {};
+            
+            // 名言库扩展
+            const allQuotes = {
+                english: [
+                    { text: "The limits of my language mean the limits of my world.", author: "Ludwig Wittgenstein", translation: "我的语言的界限就是我的世界的界限。" },
+                    { text: "To have another language is to possess a second soul.", author: "Charlemagne", translation: "拥有另一种语言就是拥有第二个灵魂。" },
+                    { text: "Language is the road map of a culture.", author: "Rita Mae Brown", translation: "语言是文化的路线图。" },
+                    { text: "Learning is a treasure that will follow its owner everywhere.", author: "Chinese Proverb", translation: "学习是跟随主人到任何地方都会有的财富。" },
+                    { text: "The beautiful thing about learning is that no one can take it away from you.", author: "B.B. King", translation: "学习的美妙之处在于没人能从你身上夺走它。" },
+                    { text: "Knowledge speaks, but wisdom listens.", author: "Jimi Hendrix", translation: "知识会说话，但智慧懂得倾听。" },
+                    { text: "In learning you will teach, and in teaching you will learn.", author: "Phil Collins", translation: "在学习中你会教导，在教导中你会学习。" },
+                    { text: "The mind is not a vessel to be filled, but a fire to be kindled.", author: "Plutarch", translation: "心灵不是需要被填满的容器，而是需要被点燃的火种。" },
+                    { text: "Education is the passport to the future.", author: "Malcolm X", translation: "教育是通往未来的护照。" },
+                    { text: "Live as if you were to die tomorrow. Learn as if you were to live forever.", author: "Mahatma Gandhi", translation: "像明天就要死去那样生活，像永远活着那样学习。" }
+                ],
+                japanese: [
+                    { text: "石の上にも三年", author: "日本谚语", translation: "石头上面坐三年（持之以恒必能成功）" },
+                    { text: "猿も木から落ちる", author: "日本谚语", translation: "猴子也会从树上掉下来（智者千虑必有一失）" },
+                    { text: "継続は力なり", author: "日本谚语", translation: "坚持就是力量" },
+                    { text: "時は金なり", author: "日本谚语", translation: "时间就是金钱" },
+                    { text: "知識は力なり", author: "日本谚语", translation: "知识就是力量" },
+                    { text: "習うより慣れよ", author: "日本谚语", translation: "熟能生巧" },
+                    { text: "百聞は一見に如かず", author: "日本谚语", translation: "百闻不如一见" },
+                    { text: "初心忘るべからず", author: "日本谚语", translation: "勿忘初心" },
+                    { text: "努力は必ず報われる", author: "日本谚语", translation: "努力必定会有回报" },
+                    { text: "失敗は成功のもと", author: "日本谚语", translation: "失败是成功之母" }
+                ],
+                french: [
+                    { text: "Petit à petit, l'oiseau fait son nid.", author: "Proverbe français", translation: "小鸟一点一点地筑巢（循序渐进）" },
+                    { text: "Qui ne risque rien n'a rien.", author: "Proverbe français", translation: "不冒险就一无所获" },
+                    { text: "Il n'y a que le premier pas qui coûte.", author: "Proverbe français", translation: "万事开头难" },
+                    { text: "Rome ne s'est pas faite en un jour.", author: "Proverbe français", translation: "罗马不是一天建成的" },
+                    { text: "Vouloir, c'est pouvoir.", author: "Proverbe français", translation: "有志者事竟成" },
+                    { text: "L'habitude est une seconde nature.", author: "Proverbe français", translation: "习惯成自然" },
+                    { text: "À cœur vaillant rien d'impossible.", author: "Proverbe français", translation: "有志者事竟成" },
+                    { text: "Qui cherche trouve.", author: "Proverbe français", translation: "寻找的人必有收获" },
+                    { text: "Mieux vaut tard que jamais.", author: "Proverbe français", translation: "迟做总比不做好" },
+                    { text: "L'union fait la force.", author: "Proverbe français", translation: "团结就是力量" }
+                ]
+            };
+
+            // 日语练习题库扩展
+            const japaneseExercises = [
+                // N5级别
+                { type: "choice", question: "「はい」はどんなときに使いますか？", options: ["はい」と言うとき", "いいえ」と言うとき", "分からないとき", "怒っているとき"], correct: 0, level: "N5", explanation: "「はい」は肯定の返事をするときに使います。" },
+                { type: "choice", question: "「ありがとう」の意味は？", options: ["こんにちは", "ありがとう", "さようなら", "すみません"], correct: 1, level: "N5", explanation: "「ありがとう」は感謝の気持ちを表します。" },
+                { type: "choice", question: "「日本語」の読み方は？", options: ["にほんご", "にっぽんご", "にほん", "にっぽん"], correct: 0, level: "N5", explanation: "「日本語」は「にほんご」と読みます。" },
+                { type: "choice", question: "「学生」の意味は？", options: ["先生", "学生", "会社員", "医者"], correct: 1, level: "N5", explanation: "「学生」は学生を意味します。" },
+                { type: "choice", question: "「水」の読み方は？", options: ["みず", "ほし", "つき", "ひ"], correct: 0, level: "N5", explanation: "「水」は「みず」と読みます。" },
+                
+                // N4级别
+                { type: "choice", question: "「食べます」の否定形は？", options: ["食べます", "食べません", "食べた", "食べて"], correct: 1, level: "N4", explanation: "動詞の否定形は「～ません」です。" },
+                { type: "choice", question: "「大きい」の反対語は？", options: ["大きい", "小さい", "高い", "安い"], correct: 1, level: "N4", explanation: "「大きい」の反対語は「小さい」です。" },
+                { type: "choice", question: "「行きます」のて形は？", options: ["行き", "行って", "行った", "行く"], correct: 1, level: "N4", explanation: "「行きます」のて形は「行って」です。" },
+                { type: "choice", question: "「読む」の過去形は？", options: ["読む", "読んだ", "読み", "読んで"], correct: 1, level: "N4", explanation: "「読む」の過去形は「読んだ」です。" },
+                { type: "choice", question: "「寒い」の意味は？", options: ["暑い", "寒い", "暖かい", "涼しい"], correct: 1, level: "N4", explanation: "「寒い」は気温が低いことを表します。" },
+                
+                // N3级别
+                { type: "choice", question: "「〜ながら」の使い方は？", options: ["同時に", "後で", "前に", "終わった後"], correct: 0, level: "N3", explanation: "「〜ながら」は同時に行うことを表します。" },
+                { type: "choice", question: "「〜そうだ」の使い方は？", options: ["伝聞", "推量", "過去", "未来"], correct: 0, level: "N3", explanation: "「〜そうだ」は伝聞を表します。" },
+                { type: "choice", question: "「〜ように」の意味は？", options: ["方法", "目的", "原因", "結果"], correct: 1, level: "N3", explanation: "「〜ように」は目的を表します。" },
+                { type: "choice", question: "「〜てしまう」の意味は？", options: ["完了・後悔", "開始", "継続", "中止"], correct: 0, level: "N3", explanation: "「〜てしまう」は完了や後悔を表します。" },
+                { type: "choice", question: "「〜かもしれない」の意味は？", options: ["確実", "可能", "不可能", "必要"], correct: 1, level: "N3", explanation: "「〜かもしれない」は可能性を表します。" }
+            ];
+
+            // 法语练习题库扩展
+            const frenchExercises = [
+                // A1级别
+                { type: "choice", question: "Comment dit-on « bonjour » en français ?", options: ["Bonjour", "Bonsoir", "Bonne nuit", "Au revoir"], correct: 0, level: "A1", explanation: "「Bonjour」は「こんにちは」という意味です。" },
+                { type: "choice", question: "Comment dit-on « merci » en français ?", options: ["Bonjour", "Merci", "Au revoir", "Pardon"], correct: 1, level: "A1", explanation: "「Merci」は「ありがとう」という意味です。" },
+                { type: "choice", question: "Comment dit-on « au revoir » en français ?", options: ["Bonjour", "Merci", "Au revoir", "S'il vous plaît"], correct: 2, level: "A1", explanation: "「Au revoir」は「さようなら」という意味です。" },
+                { type: "choice", question: "Comment conjugue le verbe « être » au présent pour « je » ?", options: ["je suis", "je es", "je est", "je sont"], correct: 0, level: "A1", explanation: "動詞「être」の第一人称単数は「je suis」です。" },
+                { type: "choice", question: "Comment conjugue le verbe « avoir » au présent pour « il » ?", options: ["il a", "il ai", "il as", "il avons"], correct: 0, level: "A1", explanation: "動詞「avoir」の三人称単数は「il a」です。" },
+                
+                // A2级别
+                { type: "choice", question: "Comment dit-on « j'ai faim » en français ?", options: ["J'ai faim", "Je suis faim", "Je fais faim", "Je mange faim"], correct: 0, level: "A2", explanation: "「avoir faim」で「お腹が空いている」という意味です。" },
+                { type: "choice", question: "Comment dit-on « il est tard » en français ?", options: ["Il est tard", "Il est en retard", "Il est avance", "Il est rapide"], correct: 0, level: "A2", explanation: "「Il est tard」で「時間が遅い」という意味です。" },
+                { type: "choice", question: "Comment conjugue le verbe « aller » au présent pour « nous » ?", options: ["nous allons", "nous aller", "nous allez", "nous va"], correct: 0, level: "A2", explanation: "動詞「aller」の第一人称複数は「nous allons」です。" },
+                { type: "choice", question: "Comment dit-on « je voudrais » en français ?", options: ["Je veux", "Je voudrais", "Je vais", "Je viens"], correct: 1, level: "A2", explanation: "「Je voudrais」は丁寧な要求の表現です。" },
+                { type: "choice", question: "Comment dit-on « c'est combien ? » en français ?", options: ["C'est combien ?", "Combien ça coûte ?", "Quel est le prix ?", "以上すべて"], correct: 3, level: "A2", explanation: "値段を聞くときはこれらの表現が使えます。" },
+                
+                // B1级别
+                { type: "choice", question: "Quel est le passé composé de « manger » pour « j' » ?", options: ["j'ai mangé", "je mangeai", "je mangeais", "je mangerai"], correct: 0, level: "B1", explanation: "「manger」の複合過去時制は「j'ai mangé」です。" },
+                { type: "choice", question: "Comment dit-on « si j'étais riche » en français ?", options: ["Si je suis riche", "Si j'étais riche", "Si je serai riche", "Si je serais riche"], correct: 1, level: "B1", explanation: "仮定法の過去では「si + 未完成過去」です。" },
+                { type: "choice", question: "Comment dit-on « il faut que » en français ?", options: ["Il faut que", "Il faut", "Il est nécessaire", "Il doit"], correct: 0, level: "B1", explanation: "「il faut que」の後には仮定法現在が続きます。" },
+                { type: "choice", question: "Comment dit-on « je viens de » en français ?", options: ["Je viens de", "Je viens", "Je viens à", "Je viens en"], correct: 0, level: "B1", explanation: "「je viens de + 動詞」で「～したばかり」という意味です。" },
+                { type: "choice", question: "Comment dit-on « ça fait » en français pour exprimer la durée ?", options: ["Ça fait", "Il fait", "C'est fait", "Fait"], correct: 0, level: "B1", explanation: "「ça fait + 時間」で「～経っている」という意味です。" }
+            ];
+
+            // 创意写作提示扩展
+            const writingPrompts = [
+                { theme: "新年决心", prompt: "写下你的2026年语言学习目标，包括具体的时间安排和期望达到的水平。" },
+                { theme: "学习习惯", prompt: "描述你每天学习语言的最佳时间和方法，以及如何保持学习动力。" },
+                { theme: "语言学习感悟", prompt: "分享你学习新语言过程中最有趣或最困难的经历，以及你从中学到的东西。" },
+                { theme: "文化交流", prompt: "想象你正在用新语言与外国朋友交流，描述这种跨文化体验。" },
+                { theme: "未来展望", prompt: "写一封信给2027年的自己，谈谈你现在学习语言的努力和期望。" },
+                { theme: "学习方法", prompt: "比较不同的语言学习方法，找出最适合你的方式并说明理由。" },
+                { theme: "文化理解", prompt: "通过学习语言，你对哪个国家的文化有了更深的理解？分享你的发现。" },
+                { theme: "挑战与突破", prompt: "描述你在语言学习中遇到的最大挑战，以及你是如何克服它的。" },
+                { theme: "学习伙伴", prompt: "如果你有语言学习伙伴，描述你们如何互相帮助和鼓励。" },
+                { theme: "实际应用", prompt: "想象你正在国外旅行，需要用新语言解决一个实际问题，写下这个场景。" }
+            ];
+
+            // 生成全年365天内容
+            for (let day = 1; day <= 365; day++) {
+                const month = Math.floor((day - 1) / 30.4);
+                const monthDay = day % 30 || 30;
+                
+                content[day] = {
+                    quotes: {
+                        english: allQuotes.english[day % allQuotes.english.length],
+                        japanese: allQuotes.japanese[day % allQuotes.japanese.length],
+                        french: allQuotes.french[day % allQuotes.french.length]
+                    },
+                    japanese: japaneseExercises[day % japaneseExercises.length],
+                    french: frenchExercises[day % frenchExercises.length],
+                    writing: writingPrompts[day % writingPrompts.length]
+                };
+            }
+            
+            return content;
+        }
+
+        // 生成完整的全年内容
+        const fullYearContent = generateFullYearContent();
+
+        // 初始化
+        function initCalendar() {
+            generateMonthSelector();
+            generateWeekdays();
+            generateMonthCalendar();
+            loadDate(currentDate);
+            updateProgress();
+        }
+
+        // 生成月份选择器
+        function generateMonthSelector() {
+            const monthGrid = document.getElementById('monthGrid');
+            monthGrid.innerHTML = '';
+
+            monthNames.forEach((monthName, index) => {
+                const monthBtn = document.createElement('button');
+                monthBtn.className = 'month-btn';
+                monthBtn.textContent = monthName;
+                monthBtn.dataset.month = index;
+                
+                if (index === currentMonth) {
+                    monthBtn.classList.add('active');
+                }
+
+                monthBtn.addEventListener('click', () => {
+                    selectMonth(index);
+                });
+
+                monthGrid.appendChild(monthBtn);
+            });
+        }
+
+        // 生成星期标题
+        function generateWeekdays() {
+            const weekdaysContainer = document.getElementById('weekdays');
+            weekdaysContainer.innerHTML = '';
+
+            const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+            weekDays.forEach(day => {
+                const weekdayDiv = document.createElement('div');
+                weekdayDiv.className = 'weekday';
+                weekdayDiv.textContent = day;
+                weekdaysContainer.appendChild(weekdayDiv);
+            });
+        }
+
+        // 生成当月日历
+        function generateMonthCalendar() {
+            const daysGrid = document.getElementById('daysGrid');
+            const calendarTitle = document.getElementById('calendarTitle');
+            
+            daysGrid.innerHTML = '';
+            calendarTitle.textContent = `${currentYear}年${monthNames[currentMonth]}`;
+
+            // 获取当月第一天是星期几
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            
+            // 添加上月尾日期
+            const prevMonthDays = currentMonth === 0 ? 31 : monthDays[currentMonth - 1];
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'day other-month';
+                dayDiv.textContent = prevMonthDays - i;
+                daysGrid.appendChild(dayDiv);
+            }
+
+            // 添加当月日期
+            const daysInMonth = monthDays[currentMonth];
+            const today = new Date();
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'day';
+                dayDiv.textContent = day;
+                
+                const date = new Date(currentYear, currentMonth, day);
+                const dateKey = getDateKey(date);
+                
+                // 检查是否是今天
+                if (date.toDateString() === today.toDateString()) {
+                    dayDiv.classList.add('today');
+                }
+                
+                // 检查是否是当前选中的日期
+                if (date.toDateString() === currentDate.toDateString()) {
+                    dayDiv.classList.add('selected');
+                }
+                
+                // 检查是否已打卡
+                if (checkedDates[dateKey]) {
+                    dayDiv.classList.add('checked');
+                }
+
+                dayDiv.addEventListener('click', () => {
+                    selectDate(date);
+                });
+
+                daysGrid.appendChild(dayDiv);
+            }
+
+            // 添加下月头日期
+            const totalCells = daysGrid.children.length;
+            const remainingCells = 42 - totalCells; // 6行 × 7列
+            for (let day = 1; day <= remainingCells; day++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'day other-month';
+                dayDiv.textContent = day;
+                daysGrid.appendChild(dayDiv);
+            }
+        }
+
+        // 选择月份
+        function selectMonth(month) {
+            currentMonth = month;
+            
+            // 更新月份按钮状态
+            document.querySelectorAll('.month-btn').forEach((btn, index) => {
+                btn.classList.toggle('active', index === month);
+            });
+            
+            // 重新生成日历
+            generateMonthCalendar();
+        }
+
+        // 切换月份（箭头按钮）
+        function changeMonth(delta) {
+            currentMonth += delta;
+            
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            
+            // 确保不超过2026年
+            if (currentYear > 2026) {
+                currentYear = 2026;
+                currentMonth = 11;
+            } else if (currentYear < 2026) {
+                currentYear = 2026;
+                currentMonth = 0;
+            }
+            
+            selectMonth(currentMonth);
+        }
+
+        // 选择日期
+        function selectDate(date) {
+            currentDate = date;
+            
+            // 如果选择的日期不在当前月，切换到相应月份
+            if (date.getMonth() !== currentMonth) {
+                selectMonth(date.getMonth());
+            }
+            
+            loadDate(date);
+            generateMonthCalendar(); // 重新生成以更新选中状态
+        }
+
+        // 获取日期在一年中的第几天
+        function getDayOfYear(date) {
+            const start = new Date(date.getFullYear(), 0, 0);
+            const diff = date - start;
+            return Math.floor(diff / (1000 * 60 * 60 * 24));
+        }
+
+        // 加载指定日期内容
+        function loadDate(date) {
+            updateDateDisplay(date);
+            loadQuotes(date);
+            loadExercise(date);
+        }
+
+        // 更新日期显示
+        function updateDateDisplay(date) {
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            const weekday = date.getDay();
+
+            document.getElementById('dateInfo').textContent = 
+                `${year}年${month}月${day}日`;
+
+            document.getElementById('weekdayInfo').innerHTML = `
+                ${weekdays.zh[weekday]} 
+                <span style="color: #666; font-size: 14px;">
+                    (${weekdays.fr[weekday]} / ${weekdays.ja[weekday]})
+                </span>
+            `;
+
+            // 简化的农历计算
+            const lunarMonth = lunarMonths[(month + 9) % 12];
+            const lunarDay = lunarDays[(day + 12) % 30];
+            document.getElementById('lunarInfo').textContent = 
+                `农历${lunarMonth}${lunarDay}`;
+        }
+
+        // 加载名言
+        function loadQuotes(date) {
+            const dayOfYear = getDayOfYear(date);
+            const quoteData = fullYearContent[dayOfYear].quotes;
+            
+            const quotesGrid = document.getElementById('quotesGrid');
+            quotesGrid.innerHTML = '';
+
+            const languages = ['english', 'japanese', 'french'];
+            const flags = ['🇬🇧', '🇯🇵', '🇫🇷'];
+            const names = ['英语名言', '日本語の名言', 'Citation française'];
+
+            languages.forEach((lang, index) => {
+                const quote = quoteData[lang];
+                const card = document.createElement('div');
+                card.className = `quote-card ${lang}`;
+                card.innerHTML = `
+                    <div class="quote-language">${flags[index]} ${names[index]} (${lang})</div>
+                    <div class="quote-text">"${quote.text}"</div>
+                    <div class="quote-author">— ${quote.author}</div>
+                    <div class="quote-translation">译文：${quote.translation}</div>
+                `;
+                quotesGrid.appendChild(card);
+            });
+        }
+
+        // 加载练习
+        function loadExercise(date) {
+            const dayOfYear = getDayOfYear(date);
+            const dayContent = fullYearContent[dayOfYear];
+            
+            // 存储当前练习
+            window.currentJapaneseExercise = { ...dayContent.japanese, dateKey: getDateKey(date) };
+            window.currentFrenchExercise = { ...dayContent.french, dateKey: getDateKey(date) };
+            window.currentWritingPrompt = { ...dayContent.writing, dateKey: getDateKey(date) };
+
+            // 根据当前标签页显示相应内容
+            switchTab(currentTab);
+        }
+
+        // 切换标签页
+        function switchTab(tabName) {
+            currentTab = tabName;
+            
+            // 更新标签样式
+            document.querySelectorAll('.tab').forEach((tab, index) => {
+                tab.classList.toggle('active', 
+                    (tabName === 'japanese' && index === 0) ||
+                    (tabName === 'french' && index === 1) ||
+                    (tabName === 'writing' && index === 2)
+                );
+            });
+
+            // 显示相应内容
+            const exerciseContent = document.getElementById('exerciseContent');
+            const dayOfYear = getDayOfYear(currentDate);
+            
+            if (tabName === 'japanese') {
+                exerciseContent.innerHTML = createJapaneseExerciseHTML(window.currentJapaneseExercise);
+            } else if (tabName === 'french') {
+                exerciseContent.innerHTML = createFrenchExerciseHTML(window.currentFrenchExercise);
+            } else if (tabName === 'writing') {
+                exerciseContent.innerHTML = createWritingExerciseHTML(window.currentWritingPrompt);
+            }
+        }
+
+        // 创建日语练习HTML
+        function createJapaneseExerciseHTML(exercise) {
+            const header = `
+                <div class="exercise-title">🇯🇵 日语能力测试（${exercise.level}）</div>
+                <div class="exercise-description">
+                    <div class="question-text">${exercise.question}</div>
+                </div>
+            `;
+
+            if (exercise.type === 'choice') {
+                const options = exercise.options.map((option, index) => `
+                    <div class="option" onclick="checkAnswer('japanese', ${index})">
+                        ${String.fromCharCode(65 + index)}. ${option}
+                    </div>
+                `).join('');
+
+                return header + `
+                    <div class="options" id="options">${options}</div>
+                    <div class="answer-section" id="answerSection">
+                        <div class="answer-title">正解！</div>
+                        <div>正确答案：${String.fromCharCode(65 + exercise.correct)}</div>
+                        <div>解析：${exercise.explanation}</div>
+                    </div>
+                `;
+            } else {
+                return header + `
+                    <input type="text" class="input-answer" id="inputAnswer" 
+                           placeholder="请输入你的答案...">
+                    <button class="submit-btn" onclick="submitInputAnswer('japanese')">
+                        提交答案
+                    </button>
+                    <div class="answer-section" id="answerSection">
+                        <div class="answer-title">参考答案</div>
+                        <div>正确答案：${exercise.answer}</div>
+                        <div>关键词：${exercise.keywords.join('、')}</div>
+                        <div>解析：${exercise.explanation}</div>
+                    </div>
+                `;
+            }
+        }
+
+        // 创建法语练习HTML
+        function createFrenchExerciseHTML(exercise) {
+            const header = `
+                <div class="exercise-title">🇫🇷 法语练习（${exercise.level}）</div>
+                <div class="exercise-description">
+                    <div class="question-text">${exercise.question}</div>
+                </div>
+            `;
+
+            if (exercise.type === 'choice') {
+                const options = exercise.options.map((option, index) => `
+                    <div class="option" onclick="checkAnswer('french', ${index})">
+                        ${String.fromCharCode(65 + index)}. ${option}
+                    </div>
+                `).join('');
+
+                return header + `
+                    <div class="options" id="options">${options}</div>
+                    <div class="answer-section" id="answerSection">
+                        <div class="answer-title">Bien joué !</div>
+                        <div>正确答案：${String.fromCharCode(65 + exercise.correct)}</div>
+                        <div>解析：${exercise.explanation}</div>
+                    </div>
+                `;
+            } else {
+                return header + `
+                    <input type="text" class="input-answer" id="inputAnswer" 
+                           placeholder="Veuillez saisir votre réponse...">
+                    <button class="submit-btn" onclick="submitInputAnswer('french')">
+                        Soumettre
+                    </button>
+                    <div class="answer-section" id="answerSection">
+                        <div class="answer-title">Réponse de référence</div>
+                        <div>正确答案：${exercise.answer}</div>
+                        <div>关键词：${exercise.keywords.join('、')}</div>
+                        <div>解析：${exercise.explanation}</div>
+                    </div>
+                `;
+            }
+        }
+
+        // 创建写作练习HTML
+        function createWritingExerciseHTML(prompt) {
+            return `
+                <div class="writing-prompt">
+                    <h4>✨ ${prompt.theme}</h4>
+                    <p style="font-size: 16px; margin: 10px 0;">${prompt.prompt}</p>
+                </div>
+                <textarea class="writing-textarea" id="writingArea" 
+                          placeholder="在这里写下你的创作...（建议300-500字）"></textarea>
+                <div style="display: flex; gap: 10px;">
+                    <button class="submit-btn" onclick="saveWriting()">💾 保存草稿</button>
+                    <button class="submit-btn" onclick="checkWriting()">✅ 标记完成</button>
+                </div>
+                <div class="answer-section" id="writingSection">
+                    <div class="answer-title">🎉 写作完成！</div>
+                    <p>你的创作已保存。坚持写作是提高语言能力的重要途径！</p>
+                    <p>建议：可以分享给你的语言学习伙伴，互相点评提高。</p>
+                </div>
+            `;
+        }
+
+        // 检查选择题答案
+        function checkAnswer(language, selectedIndex) {
+            const exercise = language === 'japanese' ? window.currentJapaneseExercise : window.currentFrenchExercise;
+            const options = document.querySelectorAll('.option');
+            
+            options.forEach((option, index) => {
+                option.classList.add('disabled');
+                if (index === exercise.correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex) {
+                    option.classList.add('incorrect');
+                }
+            });
+
+            document.getElementById('answerSection').classList.add('show');
+
+            if (selectedIndex === exercise.correct) {
+                markAsChecked();
+            }
+        }
+
+        // 提交输入题答案
+        function submitInputAnswer(language) {
+            const userAnswer = document.getElementById('inputAnswer').value.trim();
+            if (!userAnswer) {
+                alert(language === 'japanese' ? '请输入答案' : 'Veuillez saisir une réponse');
+                return;
+            }
+
+            const exercise = language === 'japanese' ? window.currentJapaneseExercise : window.currentFrenchExercise;
+            const keywords = exercise.keywords || [];
+            
+            // 检查是否包含关键词
+            const containsKeywords = keywords.length === 0 || keywords.some(keyword => 
+                userAnswer.includes(keyword) || 
+                exercise.answer.includes(userAnswer) ||
+                userAnswer.includes(exercise.answer)
+            );
+
+            document.getElementById('answerSection').classList.add('show');
+            
+            if (containsKeywords && userAnswer.length > 10) {
+                markAsChecked();
+            }
+        }
+
+        // 保存写作
+        function saveWriting() {
+            const content = document.getElementById('writingArea').value;
+            if (content) {
+                localStorage.setItem(`writing_${getDateKey(currentDate)}`, content);
+                alert('草稿已保存！');
+            }
+        }
+
+        // 检查写作完成
+        function checkWriting() {
+            const content = document.getElementById('writingArea').value;
+            if (content && content.length > 100) {
+                document.getElementById('writingSection').classList.add('show');
+                markAsChecked();
+            } else {
+                alert('请至少写100字的内容后再标记完成。');
+            }
+        }
+
+        // 标记日期为已打卡
+        function markAsChecked() {
+            const dateKey = getDateKey(currentDate);
+            if (!checkedDates[dateKey]) {
+                checkedDates[dateKey] = true;
+                localStorage.setItem('checkedDates2026', JSON.stringify(checkedDates));
+                
+                // 更新UI
+                updateProgress();
+                generateMonthCalendar();
+                
+                // 显示成功提示
+                showNotification('🎉 恭喜完成今日学习！');
+            }
+        }
+
+        // 更新进度
+        function updateProgress() {
+            const totalDays = Object.keys(checkedDates).length;
+            const progress = Math.round((totalDays / 365) * 100);
+            
+            document.getElementById('checkedDays').textContent = totalDays;
+            document.getElementById('completionRate').textContent = progress;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            
+            // 计算连续打卡天数
+            let streak = 0;
+            let checkDate = new Date();
+            while (checkedDates[getDateKey(checkDate)]) {
+                streak++;
+                checkDate.setDate(checkDate.getDate() - 1);
+            }
+            document.getElementById('streakDays').textContent = streak;
+        }
+
+        // 获取日期键
+        function getDateKey(date) {
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        }
+
+        // 显示通知
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #4CAF50;
+                color: white;
+                padding: 15px 25px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                z-index: 1000;
+                font-size: 16px;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // 添加滑动动画样式
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 键盘导航
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                const prevDate = new Date(currentDate);
+                prevDate.setDate(prevDate.getDate() - 1);
+                if (prevDate.getFullYear() === 2026) {
+                    selectDate(prevDate);
+                }
+            } else if (e.key === 'ArrowRight') {
+                const nextDate = new Date(currentDate);
+                nextDate.setDate(nextDate.getDate() + 1);
+                if (nextDate.getFullYear() === 2026) {
+                    selectDate(nextDate);
+                }
+            }
+        });
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', initCalendar);
+
+        // 防止意外刷新丢失数据
+        window.addEventListener('beforeunload', (e) => {
+            const writingContent = document.getElementById('writingArea')?.value;
+            if (writingContent && !checkedDates[getDateKey(currentDate)]) {
+                e.preventDefault();
+                e.returnValue = '你有未保存的写作内容，确定要离开吗？';
+            }
+        });
+    </script>
+</body>
+</html>
