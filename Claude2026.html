@@ -1,584 +1,752 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026年学习日历</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Microsoft YaHei', Arial, sans-serif;
-            background: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container { max-width: 900px; margin: 0 auto; }
-        h1 { text-align: center; color: #312e81; margin-bottom: 20px; font-size: 2rem; }
-        
-        /* 小日历样式 */
-        .calendar-box {
-            background: white;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .cal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .cal-header h2 { font-size: 1.2rem; color: #1f2937; }
-        .nav-btn {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            padding: 5px 10px;
-            border-radius: 5px;
-        }
-        .nav-btn:hover { background: #f3f4f6; }
-        .mini-cal {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-        }
-        .mini-day {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            border-radius: 5px;
-            cursor: pointer;
-            background: #f9fafb;
-            border: none;
-        }
-        .mini-day.weekday {
-            font-weight: 600;
-            color: #6b7280;
-            background: white;
-            cursor: default;
-        }
-        .mini-day:hover:not(.weekday):not(.empty) { background: #e0e7ff; }
-        .mini-day.selected { background: #4f46e5; color: white; font-weight: bold; }
-        .mini-day.completed { background: #10b981; color: white; }
-        .mini-day.completed::after { content: '✓'; font-size: 10px; }
-        .mini-day.empty { visibility: hidden; }
-        
-        /* 内容区域 */
-        .content-box {
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .date-title {
-            font-size: 1.5rem;
-            color: #312e81;
-            margin-bottom: 10px;
-            border-bottom: 2px solid #e5e7eb;
-            padding-bottom: 10px;
-        }
-        .date-info { color: #6b7280; font-size: 0.9rem; margin-bottom: 15px; }
-        
-        .section {
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-        .section h4 { margin-bottom: 8px; font-size: 1rem; }
-        .english { background: #dbeafe; } .english h4 { color: #1e40af; }
-        .japanese { background: #fce7f3; } .japanese h4 { color: #be185d; }
-        .french { background: #e9d5ff; } .french h4 { color: #7e22ce; }
-        
-        .exercise {
-            background: #fef3c7;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-        .exercise h4 { color: #92400e; margin-bottom: 10px; }
-        .option {
-            padding: 8px;
-            margin: 6px 0;
-            border-radius: 5px;
-            background: white;
-            cursor: pointer;
-            border: 2px solid transparent;
-        }
-        .option:hover { background: #fef9c3; }
-        .option.selected { background: #fde68a; border-color: #f59e0b; }
-        .option.correct { background: #86efac; border-color: #22c55e; }
-        .option.wrong { background: #fca5a5; border-color: #ef4444; }
-        
-        .btn {
-            margin-top: 8px;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 5px;
-            background: #f59e0b;
-            color: white;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-        .btn:hover { background: #d97706; }
-        .btn-green { background: #10b981; }
-        .btn-green:hover { background: #059669; }
-        .btn-red { background: #dc2626; }
-        .btn-red:hover { background: #b91c1c; }
-        
-        .result { margin-top: 8px; font-size: 0.9rem; color: #6b7280; }
-        .creative { background: #fed7aa; } .creative h4 { color: #9a3412; }
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #9ca3af;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026学习日历</title>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #faf5ff 0%, #fce7f3 100%);
+      min-height: 100vh;
+    }
+    
+    .container {
+      display: flex;
+      gap: 2rem;
+      padding: 2rem;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    
+    /* 左侧日历 */
+    .calendar-sidebar {
+      width: 320px;
+      flex-shrink: 0;
+    }
+    
+    .calendar-card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+    }
+    
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .month-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #9333ea;
+    }
+    
+    .nav-btn {
+      background: #f3e8ff;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      cursor: pointer;
+      color: #7c3aed;
+      font-size: 0.9rem;
+    }
+    
+    .nav-btn:hover { background: #e9d5ff; }
+    .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    
+    .weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.25rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .weekday {
+      text-align: center;
+      font-size: 0.75rem;
+      color: #6b7280;
+      padding: 0.25rem;
+    }
+    
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.25rem;
+    }
+    
+    .day-btn {
+      aspect-ratio: 1;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      background: white;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+      position: relative;
+    }
+    
+    .day-btn:hover { background: #f9fafb; }
+    .day-btn.selected { background: #9333ea; color: white; border-color: #9333ea; }
+    .day-btn.completed::after {
+      content: '✓';
+      position: absolute;
+      top: 2px;
+      right: 4px;
+      font-size: 0.7rem;
+      color: #16a34a;
+      font-weight: bold;
+    }
+    .day-btn.selected.completed::after { color: #86efac; }
+    
+    /* 右侧内容区 */
+    .content-area {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .content-card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .date-display {
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid #f3f4f6;
+    }
+    
+    .date-row {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .date-item {
+      font-size: 1rem;
+    }
+    
+    .date-item strong {
+      color: #6b7280;
+      margin-right: 0.5rem;
+    }
+    
+    ruby rt { font-size: 0.6em; }
+    
+    .section {
+      margin-bottom: 2rem;
+    }
+    
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: #1f2937;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .quote-box {
+      background: #fef3c7;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 0.75rem;
+      border-left: 4px solid #f59e0b;
+    }
+    
+    .quote-text {
+      font-style: italic;
+      margin-bottom: 0.5rem;
+      line-height: 1.6;
+    }
+    
+    .quote-source {
+      font-size: 0.875rem;
+      color: #6b7280;
+      text-align: right;
+    }
+    
+    .exercise-box {
+      background: #dbeafe;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      margin-bottom: 1rem;
+      border-left: 4px solid #3b82f6;
+    }
+    
+    .exercise-box.french {
+      background: #e0e7ff;
+      border-left-color: #6366f1;
+    }
+    
+    .exercise-question {
+      font-weight: 500;
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+    
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .option-btn {
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+    
+    .option-btn:hover { border-color: #9ca3af; }
+    .option-btn.selected { border-color: #3b82f6; background: #eff6ff; }
+    .option-btn.correct { border-color: #16a34a; background: #f0fdf4; }
+    .option-btn.wrong { border-color: #dc2626; background: #fef2f2; }
+    
+    .explanation {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: white;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      color: #4b5563;
+    }
+    
+    .writing-box {
+      background: #f0fdf4;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      margin-bottom: 1rem;
+      border-left: 4px solid #16a34a;
+    }
+    
+    .writing-prompt {
+      font-weight: 500;
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+    
+    .writing-textarea {
+      width: 100%;
+      min-height: 150px;
+      padding: 1rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      font-family: inherit;
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+    
+    .writing-textarea:focus {
+      outline: none;
+      border-color: #16a34a;
+    }
+    
+    .char-count {
+      text-align: right;
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-top: 0.5rem;
+    }
+    
+    /* 隐藏的情色写作 */
+    .hidden-section {
+      margin: 2rem 0;
+      padding: 1rem;
+      background: rgba(250, 245, 255, 0.3);
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .hidden-section:hover {
+      background: rgba(250, 245, 255, 0.5);
+    }
+    
+    .hidden-trigger {
+      height: 20px;
+    }
+    
+    .hidden-content {
+      background: #fef2f2;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      border-left: 4px solid #f87171;
+      margin-top: 0.5rem;
+    }
+    
+    .check-complete-btn {
+      background: #9333ea;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 1rem;
+      margin-right: 0.5rem;
+      transition: all 0.2s;
+    }
+    
+    .check-complete-btn:hover {
+      background: #7c3aed;
+    }
+    
+    .check-complete-btn.completed {
+      background: #16a34a;
+    }
+    
+    .export-btn {
+      background: #0891b2;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 1rem;
+      margin-right: 0.5rem;
+      transition: all 0.2s;
+    }
+    
+    .export-btn:hover {
+      background: #0e7490;
+    }
+    
+    .import-btn {
+      background: #059669;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 1rem;
+      transition: all 0.2s;
+    }
+    
+    .import-btn:hover {
+      background: #047857;
+    }
+    
+    .sample-btn {
+      background: #f59e0b;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      transition: all 0.2s;
+    }
+    
+    .sample-btn:hover {
+      background: #d97706;
+    }
+    
+    .sample-content {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: white;
+      border-radius: 0.5rem;
+      border: 2px solid #fbbf24;
+      line-height: 1.8;
+    }
+    
+    .sample-title {
+      font-weight: bold;
+      color: #d97706;
+      margin-bottom: 0.5rem;
+    }
+    
+    .hidden-file-input {
+      display: none;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>📅 2026年学习日历</h1>
-        
-        <!-- 小日历 -->
-        <div class="calendar-box">
-            <div class="cal-header">
-                <button class="nav-btn" onclick="changeMonth(-1)">◀</button>
-                <h2 id="monthTitle"></h2>
-                <button class="nav-btn" onclick="changeMonth(1)">▶</button>
-            </div>
-            <div class="mini-cal" id="calendar"></div>
-        </div>
-        
-        <!-- 内容区域 -->
-        <div class="content-box" id="contentBox">
-            <div class="empty-state">
-                <p style="font-size:1.1rem">👆 点击日历选择日期查看每日内容</p>
-            </div>
-        </div>
-    </div>
+  <div id="root"></div>
+  <script src="data2026.js"></script>  
+  <script type="text/babel">
+    const { useState, useEffect } = React;
 
-    <script>
-        var year = 2026;
-        var month = 0;
-        var selected = null;
-        var jpAns = null;
-        var frAns = null;
-        var jpShow = false;
-        var frShow = false;
-        var sShow = false;
-        var completed = {};
+    function App() {
+      const [selectedDate, setSelectedDate] = useState("2026-01-04");
+      const [currentMonth, setCurrentMonth] = useState(1);
+      const [completedDates, setCompletedDates] = useState({});
+      const [japaneseAnswer, setJapaneseAnswer] = useState(null);
+      const [frenchAnswer, setFrenchAnswer] = useState(null);
+      const [showErotica, setShowErotica] = useState(false);
+      const [writingTexts, setWritingTexts] = useState({});
+      const [showSamples, setShowSamples] = useState({});
 
-        var months = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
-        var weekdays = ['日','一','二','三','四','五','六'];
-        var wkJP = ['日曜日(にちようび)','月曜日(げつようび)','火曜日(かようび)','水曜日(すいようび)','木曜日(もくようび)','金曜日(きんようび)','土曜日(どようび)'];
-        var wkFR = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
-
-        var db = {
-            qe: [
-                ["The only way to do great work is to love what you do.","Steve Jobs","做出伟大工作的唯一方法就是热爱你所做的事。"],
-                ["Life is what happens when you are busy making other plans.","John Lennon","生活就是当你忙于制定其他计划时发生的事情。"],
-                ["Get busy living or get busy dying.","Shawshank Redemption","要么忙于生存，要么赶着去死。"],
-                ["May the Force be with you.","Star Wars","愿原力与你同在。"],
-                ["In the middle of difficulty lies opportunity.","Albert Einstein","在困难的中心蕴藏着机会。"],
-                ["The future belongs to those who believe in the beauty of their dreams.","Eleanor Roosevelt","未来属于那些相信梦想之美的人。"],
-                ["It does not matter how slowly you go as long as you do not stop.","Confucius","只要不停下脚步，走得多慢都没关系。"],
-                ["Everything you can imagine is real.","Pablo Picasso","你能想象的一切都是真实的。"],
-                ["The only impossible journey is the one you never begin.","Tony Robbins","唯一不可能的旅程是你从未开始的那个。"],
-                ["To live is the rarest thing in the world.","Oscar Wilde","活着是世界上最稀有的事情。"],
-                ["Dream big and dare to fail.","Norman Vaughan","敢于梦想，敢于失败。"],
-                ["What we think, we become.","Buddha","我们想什么，就会成为什么。"],
-                ["The best time to plant a tree was 20 years ago. The second best time is now.","Chinese Proverb","种树最好的时间是20年前，其次是现在。"],
-                ["Do not wait for opportunity. Create it.","George Bernard Shaw","不要等待机会，去创造它。"],
-                ["Success is not final, failure is not fatal.","Winston Churchill","成功不是终点，失败也不是致命的。"],
-                ["Believe you can and you are halfway there.","Theodore Roosevelt","相信你能做到，你就已经成功了一半。"],
-                ["Act as if what you do makes a difference. It does.","William James","要表现得好像你做的事情能改变世界，事实也是如此。"],
-                ["The way to get started is to quit talking and begin doing.","Walt Disney","开始的方法就是停止空谈，开始行动。"],
-                ["If you are going through hell, keep going.","Winston Churchill","如果你正在经历地狱，那就继续前进。"],
-                ["Everything has beauty, but not everyone can see.","Confucius","万物皆有美，但不是每个人都能看见。"],
-                ["Change your thoughts and you change your world.","Norman Vincent Peale","改变你的想法，你就改变了你的世界。"],
-                ["The only person you are destined to become is the person you decide to be.","Ralph Waldo Emerson","你注定成为的人，是你决定成为的人。"],
-                ["Go confidently in the direction of your dreams.","Henry David Thoreau","满怀信心地朝着梦想前进。"],
-                ["You are never too old to set another goal.","C.S. Lewis","你永远不会老到无法设定新目标。"],
-                ["To be yourself in a world that is constantly trying to make you something else is the greatest accomplishment.","Ralph Waldo Emerson","在一个不断试图改变你的世界里做你自己，是最伟大的成就。"],
-                ["Happiness is not something ready made. It comes from your own actions.","Dalai Lama","幸福不是现成的东西，它来自你自己的行动。"],
-                ["Life is 10% what happens to you and 90% how you react to it.","Charles R. Swindoll","生活10%取决于发生在你身上的事，90%取决于你如何应对。"],
-                ["Keep your face always toward the sunshine and shadows will fall behind you.","Walt Whitman","始终面向阳光，阴影就会落在你身后。"],
-                ["The best revenge is massive success.","Frank Sinatra","最好的报复就是巨大的成功。"],
-                ["Do what you can with all you have wherever you are.","Theodore Roosevelt","用你所有的一切，在任何地方做你能做的事。"],
-                ["Start where you are. Use what you have. Do what you can.","Arthur Ashe","从你所在之处开始，用你拥有的，做你能做的。"]
-            ],
-            qj: [
-                ["千里(せんり)の道(みち)も一歩(いっぽ)から","老子(ろうし)","千里之行，始于足下。"],
-                ["人生(じんせい)は冒険(ぼうけん)か、それとも無(む)か","ヘレン・ケラー","人生要么是一场冒险，要么什么都不是。"],
-                ["諦(あきら)めたらそこで試合終了(しあいしゅうりょう)ですよ","スラムダンク","一旦放弃，比赛就结束了。"],
-                ["七転(ななころ)び八起(やお)き","日本(にほん)のことわざ","七次跌倒，八次站起。"],
-                ["一期一会(いちごいちえ)","千利休(せんのりきゅう)","一生一次的相会。"],
-                ["継続(けいぞく)は力(ちから)なり","日本(にほん)のことわざ","坚持就是力量。"],
-                ["好(す)きこそものの上手(じょうず)なれ","日本(にほん)のことわざ","喜欢是最好的老师。"],
-                ["急(いそ)がば回(まわ)れ","日本(にほん)のことわざ","欲速则不达。"],
-                ["笑(わら)う門(かど)には福(ふく)来(きた)る","日本(にほん)のことわざ","笑门来福。"],
-                ["時(とき)は金(かね)なり","ベンジャミン・フランクリン","时间就是金钱。"],
-                ["明日(あした)は明日(あした)の風(かぜ)が吹(ふ)く","風(かぜ)と共(とも)に去(さ)りぬ","明天自有明天的风。"],
-                ["為(な)せば成(な)る","上杉鷹山(うえすぎようざん)","有志者事竟成。"],
-                ["石(いし)の上(うえ)にも三年(さんねん)","日本(にほん)のことわざ","坐石三年热。"],
-                ["光陰矢(こういんや)の如(ごと)し","日本(にほん)のことわざ","光阴似箭。"],
-                ["塵(ちり)も積(つ)もれば山(やま)となる","日本(にほん)のことわざ","积少成多。"],
-                ["失敗(しっぱい)は成功(せいこう)のもと","日本(にほん)のことわざ","失败是成功之母。"],
-                ["三人寄(さんにんよ)れば文殊(もんじゅ)の知恵(ちえ)","日本(にほん)のことわざ","三个臭皮匠顶个诸葛亮。"],
-                ["井(い)の中(なか)の蛙(かわず)","日本(にほん)のことわざ","井底之蛙。"],
-                ["猿(さる)も木(き)から落(お)ちる","日本(にほん)のことわざ","智者千虑必有一失。"],
-                ["出(で)る杭(くい)は打(う)たれる","日本(にほん)のことわざ","枪打出头鸟。"],
-                ["情(なさ)けは人(ひと)の為(ため)ならず","日本(にほん)のことわざ","与人方便与己方便。"],
-                ["花(はな)より団子(だんご)","日本(にほん)のことわざ","实惠胜过虚名。"],
-                ["蓼(たで)食(く)う虫(むし)も好(す)き好(ず)き","日本(にほん)のことわざ","萝卜青菜各有所爱。"],
-                ["鬼(おに)に金棒(かなぼう)","日本(にほん)のことわざ","如虎添翼。"],
-                ["馬(うま)の耳(みみ)に念仏(ねんぶつ)","日本(にほん)のことわざ","对牛弹琴。"],
-                ["覆水盆(ふくすいぼん)に返(かえ)らず","日本(にほん)のことわざ","覆水难收。"],
-                ["虎穴(こけつ)に入(い)らずんば虎子(こじ)を得(え)ず","日本(にほん)のことわざ","不入虎穴焉得虎子。"],
-                ["能(よ)く学(まな)び能(よ)く遊(あそ)べ","日本(にほん)のことわざ","学习工作两不误。"],
-                ["人間万事塞翁(にんげんばんじさいおう)が馬(うま)","中国(ちゅうごく)の故事(こじ)","塞翁失马焉知非福。"],
-                ["雨降(あめふ)って地固(じかた)まる","日本(にほん)のことわざ","雨过天晴。"],
-                ["案(あん)ずるより産(う)むが易(やす)し","日本(にほん)のことわざ","车到山前必有路。"]
-            ],
-            qf: [
-                ["La vie est belle.","Proverbe francais","生活是美好的。"],
-                ["Tout est bien qui finit bien.","Shakespeare","结局好就一切都好。"],
-                ["Je pense, donc je suis.","Descartes","我思故我在。"],
-                ["C est la vie.","Expression francaise","这就是生活。"],
-                ["Qui vivra verra.","Proverbe francais","活着就能看到。"],
-                ["Petit a petit, l oiseau fait son nid.","Proverbe francais","鸟儿一点一点筑巢。"],
-                ["Vouloir c est pouvoir.","Proverbe francais","有志者事竟成。"],
-                ["L amour est aveugle.","Proverbe","爱情是盲目的。"],
-                ["Le temps c est de l argent.","Benjamin Franklin","时间就是金钱。"],
-                ["Qui ne tente rien n a rien.","Proverbe francais","不尝试就没有收获。"],
-                ["L homme propose, Dieu dispose.","Proverbe","谋事在人成事在天。"],
-                ["Il n y a que le premier pas qui coute.","Proverbe francais","万事开头难。"],
-                ["Aide-toi, le ciel t aidera.","Proverbe francais","自助者天助。"],
-                ["Rome ne s est pas faite en un jour.","Proverbe francais","罗马不是一天建成的。"],
-                ["Rira bien qui rira le dernier.","Proverbe francais","笑到最后的人笑得最好。"],
-                ["La patience est la cle du paradis.","Proverbe francais","耐心是通往天堂的钥匙。"],
-                ["L appetit vient en mangeant.","Proverbe francais","食欲在吃中产生。"],
-                ["Chat echaude craint l eau froide.","Proverbe francais","一朝被蛇咬十年怕井绳。"],
-                ["Il faut battre le fer pendant qu il est chaud.","Proverbe francais","趁热打铁。"],
-                ["Qui ne risque rien n a rien.","Proverbe francais","不冒险就没有收获。"],
-                ["L union fait la force.","Proverbe francais","团结就是力量。"],
-                ["Chacun voit midi a sa porte.","Proverbe francais","各人自扫门前雪。"],
-                ["Les murs ont des oreilles.","Proverbe francais","隔墙有耳。"],
-                ["L habit ne fait pas le moine.","Proverbe francais","人不可貌相。"],
-                ["Apres la pluie, le beau temps.","Proverbe francais","雨过天晴。"],
-                ["Mieux vaut tard que jamais.","Proverbe francais","迟做总比不做好。"],
-                ["L occasion fait le larron.","Proverbe francais","机会造就小偷。"],
-                ["On ne fait pas d omelette sans casser des oeufs.","Proverbe francais","不打破鸡蛋做不成煎蛋。"],
-                ["Qui cherche trouve.","Proverbe francais","有志者事竟成。"],
-                ["Loin des yeux, loin du coeur.","Proverbe francais","眼不见心不烦。"],
-                ["La nuit porte conseil.","Proverbe francais","夜晚带来建议。"]
-            ],
-            ej: [
-                {q:"彼(かれ)は___頑張(がんば)っているのに、成績(せいせき)が上(あ)がらない。",o:["あんなに","そんなに","こんなに"],a:0,l:"N3"},
-                {q:"このレストランは___美味(おい)しいと評判(ひょうばん)です。",o:["とても","たいへん","なかなか"],a:2,l:"N3"},
-                {q:"雨(あめ)が降(ふ)る___、出(で)かけるのをやめた。",o:["ので","のに","から"],a:0,l:"N3"},
-                {q:"彼女(かのじょ)は日本語(にほんご)___上手(じょうず)になりました。",o:["が","に","を"],a:0,l:"N3"},
-                {q:"田中(たなか)さん___会(あ)ったことがありますか。",o:["に","と","を"],a:0,l:"N3"},
-                {q:"電車(でんしゃ)が___、会社(かいしゃ)に遅(おく)れました。",o:["遅れて","遅れたら","遅れるので"],a:0,l:"N3"},
-                {q:"___勉強(べんきょう)しても、なかなか覚(おぼ)えられない。",o:["いくら","どんなに","たとえ"],a:0,l:"N3"},
-                {q:"彼(かれ)は忙(いそが)しい___、手伝(てつだ)ってくれた。",o:["ので","のに","から"],a:1,l:"N3"},
-                {q:"この本(ほん)は___読(よ)みやすいです。",o:["とても","たいへん","なかなか"],a:0,l:"N3"},
-                {q:"駅(えき)___着(つ)いたら、電話(でんわ)してください。",o:["に","で","を"],a:0,l:"N3"},
-                {q:"___寒(さむ)くても、毎日(まいにち)ジョギングします。",o:["いくら","どんなに","たとえ"],a:0,l:"N3"},
-                {q:"この問題(もんだい)は難(むずか)しい___、やってみます。",o:["けど","のに","ので"],a:0,l:"N3"},
-                {q:"先生(せんせい)___教(おし)えていただきました。",o:["に","から","を"],a:0,l:"N3"},
-                {q:"日本(にほん)に来(き)て___、3年(ねん)になります。",o:["から","ので","のに"],a:0,l:"N3"},
-                {q:"彼(かれ)は親切(しんせつ)___、面白(おもしろ)い人(ひと)です。",o:["で","に","が"],a:0,l:"N3"},
-                {q:"病気(びょうき)___、学校(がっこう)を休(やす)みました。",o:["で","に","を"],a:0,l:"N3"},
-                {q:"この映画(えいが)は___感動(かんどう)しました。",o:["とても","たいへん","すごく"],a:0,l:"N3"},
-                {q:"明日(あした)___雨(あめ)が降(ふ)ったら、中止(ちゅうし)です。",o:["に","で","×"],a:2,l:"N3"},
-                {q:"彼女(かのじょ)___プレゼントをもらいました。",o:["に","から","を"],a:1,l:"N3"},
-                {q:"図書館(としょかん)___本(ほん)を借(か)ります。",o:["で","に","から"],a:0,l:"N3"},
-                {q:"友達(ともだち)___相談(そうだん)しました。",o:["に","と","へ"],a:0,l:"N3"},
-                {q:"駅(えき)の近(ちか)く___住(す)んでいます。",o:["に","で","を"],a:0,l:"N3"},
-                {q:"毎朝(まいあさ)7時(じ)___起(お)きます。",o:["に","で","を"],a:0,l:"N3"},
-                {q:"この料理(りょうり)は___作(つく)れます。",o:["簡単に","簡単で","簡単の"],a:0,l:"N3"},
-                {q:"___暑(あつ)いので、窓(まど)を開(あ)けました。",o:["とても","たいへん","すごく"],a:0,l:"N3"},
-                {q:"彼(かれ)は___走(はし)るのが速(はや)い。",o:["とても","たいへん","すごく"],a:0,l:"N3"},
-                {q:"宿題(しゅくだい)___終(お)わったら、遊(あそ)びに行(い)きます。",o:["が","を","に"],a:0,l:"N3"},
-                {q:"この店(みせ)は品物(しなもの)が___、安(やす)い。",o:["多いし","多くて","多いから"],a:0,l:"N3"},
-                {q:"日本語(にほんご)___話(はな)せるようになりました。",o:["が","を","に"],a:0,l:"N3"},
-                {q:"バス___電車(でんしゃ)で行(い)きます。",o:["や","か","と"],a:1,l:"N3"},
-                {q:"昨日(きのう)は疲(つか)れて___、すぐ寝(ね)ました。",o:["いて","いるので","いたので"],a:2,l:"N3"}
-            ],
-            ef: [
-                {q:"Je vais ___ Paris demain.",o:["a","en","au"],a:0,l:"B1"},
-                {q:"Elle parle ___ trois langues.",o:["a","en","Ø"],a:2,l:"B1"},
-                {q:"Il fait beau ___ il pleut.",o:["mais","parce que","car"],a:0,l:"B1"},
-                {q:"Nous ___ en France depuis 5 ans.",o:["sommes","avons ete","etions"],a:0,l:"B1"},
-                {q:"___ tu veux, je t aiderai.",o:["Si","Quand","Pour que"],a:0,l:"B1"},
-                {q:"Nous nous reveillons ___ 7 heures.",o:["a","en","dans"],a:0,l:"B1"},
-                {q:"Elle est plus grande ___ sa soeur.",o:["que","de","comme"],a:0,l:"B1"},
-                {q:"Je n ai ___ vu ce film.",o:["jamais","rien","personne"],a:0,l:"B1"},
-                {q:"Il faut ___ tu finisses ce travail.",o:["que","de","pour"],a:0,l:"B1"},
-                {q:"Il est parti ___ dire au revoir.",o:["sans","ne pas","pour ne pas"],a:0,l:"B1"},
-                {q:"Je voudrais que tu ___ plus serieux.",o:["es","sois","serais"],a:1,l:"B1"},
-                {q:"Si j ___ riche, je voyagerais.",o:["etais","serais","suis"],a:0,l:"B1"},
-                {q:"Ils ___ au cinema hier soir.",o:["sont alles","ont alle","vont"],a:0,l:"B1"},
-                {q:"Je me ___ tous les jours a 7h.",o:["leve","reveille","couche"],a:0,l:"B1"},
-                {q:"C est le livre ___ j ai achete hier.",o:["que","qui","dont"],a:0,l:"B1"},
-                {q:"Elle habite en France ___ 2020.",o:["depuis","pendant","pour"],a:0,l:"B1"},
-                {q:"___ il pleut, je reste a la maison.",o:["Quand","Si","Parce que"],a:0,l:"B1"},
-                {q:"Je pense ___ toi.",o:["a","de","pour"],a:0,l:"B1"},
-                {q:"Nous avons ___ attendre longtemps.",o:["de","a","pour"],a:0,l:"B1"},
-                {q:"Il travaille ___ gagner de l argent.",o:["pour","de","a"],a:0,l:"B1"},
-                {q:"Je suis fatigue ___ j ai beaucoup travaille.",o:["parce que","pour","car"],a:0,l:"B1"},
-                {q:"___ tu arrives, appelle-moi.",o:["Quand","Si","Pendant"],a:0,l:"B1"},
-                {q:"Il fait ___ froid aujourd hui.",o:["tres","beaucoup","trop"],a:0,l:"B1"},
-                {q:"Elle est ___ intelligente que sa soeur.",o:["aussi","plus","moins"],a:0,l:"B1"},
-                {q:"Je ne veux ___ manger.",o:["pas","plus","jamais"],a:0,l:"B1"},
-                {q:"Nous ___ visiter Paris l annee prochaine.",o:["allons","voulons","devons"],a:0,l:"B1"},
-                {q:"Il ___ se lever tot demain.",o:["doit","peut","sait"],a:0,l:"B1"},
-                {q:"___ tu es fatigue, repose-toi.",o:["Si","Quand","Parce que"],a:0,l:"B1"},
-                {q:"Je prefere le the ___ cafe.",o:["au","du","de"],a:0,l:"B1"},
-                {q:"Elle ___ de Paris hier.",o:["est venue","a venu","vient"],a:0,l:"B1"},
-                {q:"Nous nous voyons ___ semaine.",o:["chaque","toute","une"],a:0,l:"B1"}
-            ],
-            cw: [
-                "写一个关于时间旅行者在2026年发现的秘密（200字）",
-                "用镜子、回声、钥匙三个词创作一个微型故事",
-                "描述一个只存在于梦中的城市",
-                "写一封来自未来的自己给现在的自己的信",
-                "创作一首关于数字化记忆的现代诗",
-                "想象一个物品突然有了生命，写下它的第一天",
-                "用100字描述一场无声的告别",
-                "创作一个开头是如果时间可以倒流的故事",
-                "描写一个被遗忘在角落的老物件的独白",
-                "写一段关于雨的意识流文字",
-                "创作一个平行宇宙中的另一个我的故事",
-                "用红色、寂静、呼吸三个词写一个片段",
-                "描述一个人生命中最后一天的24小时",
-                "写一个关于AI觉醒的科幻短篇",
-                "创作一段如果动物能说话的对话",
-                "用第二人称写一段关于失眠的文字",
-                "描写一个废弃游乐园的夜晚",
-                "创作一个交换身体题材的故事开头",
-                "写一段关于消失的记忆的悬疑片段",
-                "用光、影、等待创作一首散文诗",
-                "描述一次超现实的梦境体验",
-                "写一个关于最后一个人类的故事",
-                "创作一段时间静止后的场景描写",
-                "用书信体写一封永远寄不出的信",
-                "描写一个人第一次看见海的感受",
-                "创作一个如果重新来过的人生片段",
-                "写一段关于孤独的心理描写",
-                "描述一次灵魂出窍的体验",
-                "创作一个童话的黑暗版本",
-                "用玻璃、裂痕、真相写一个悬念故事",
-                "写一段关于最后一次见面的场景"
-            ],
-            er: [
-                "描写一次完整的性行为过程：从前戏到高潮到余韵（500字）",
-                "写一段关于第一次性经验的详细回忆：紧张、疼痛、快感的交织",
-                "创作一个关于偷情的完整场景：地点、时间、动作、心理",
-                "描写在公共场所做爱的刺激感：随时可能被发现的紧张",
-                "写一段关于多人性爱的场景：身体的交缠和欲望的释放",
-                "创作一次酒后性行为：从意识模糊到完全失控",
-                "描写一段出轨性爱：背叛的罪恶感与身体的快感并存",
-                "写一个关于性幻想实现的场景：长久压抑后的爆发",
-                "创作办公室性爱：利用职务之便的禁忌快感",
-                "描写一次报复性性行为：用身体发泄情绪",
-                "写一段关于性成瘾者的一天：无法控制的生理需求",
-                "创作一个被偷窥的性爱场景：被看的刺激感",
-                "描写初次尝试特殊性行为的心路历程",
-                "写一段车震的完整过程：狭小空间里的激情",
-                "创作一次电话性爱的详细对话和想象画面",
-                "描写在试衣间的偷欢：随时可能有人的紧张刺激",
-                "写一段关于性爱视频被传播后的羞耻与兴奋",
-                "创作一个性交易的场景：金钱与肉体的交换",
-                "描写一次群体淫乱派对的混乱场面",
-                "写一段关于师生之间的禁忌性关系",
-                "创作在健身房更衣室的激情场景",
-                "描写一次醉酒后的混乱性行为：记忆碎片",
-                "写一段关于偷拍性爱的刺激体验",
-                "创作清晨勃起引发的性行为",
-                "描写在电影院最后一排的大胆举动",
-                "写一段关于性爱成瘾康复者的挣扎",
-                "创作一个性爱游戏失控的场景",
-                "描写陌生人在酒吧厕所的激情",
-                "写一段关于网络直播性爱的心理",
-                "创作在按摩店发生的越界行为",
-                "描写毕业前最后一夜的放纵狂欢"
-            ]
+      useEffect(() => {
+        const loadData = async () => {
+          try {
+            const result = await window.storage.get('completed-dates');
+            if (result && result.value) {
+              setCompletedDates(JSON.parse(result.value));
+            }
+            const writingResult = await window.storage.get('writing-texts');
+            if (writingResult && writingResult.value) {
+              setWritingTexts(JSON.parse(writingResult.value));
+            }
+          } catch (error) {
+            console.log('首次使用');
+          }
         };
+        loadData();
+      }, []);
 
-        function renderCal() {
-            document.getElementById('monthTitle').textContent = year + '年 ' + months[month];
-            
-            var first = new Date(year, month, 1);
-            var last = new Date(year, month + 1, 0);
-            var total = last.getDate();
-            var startDay = first.getDay();
-            
-            var html = '';
-            for(var i = 0; i < weekdays.length; i++) {
-                html += '<div class="mini-day weekday">' + weekdays[i] + '</div>';
+      const saveCompleted = async (newCompleted) => {
+        try {
+          await window.storage.set('completed-dates', JSON.stringify(newCompleted));
+        } catch (error) {
+          console.error('保存失败');
+        }
+      };
+
+      const saveWriting = async (newTexts) => {
+        try {
+          await window.storage.set('writing-texts', JSON.stringify(newTexts));
+        } catch (error) {
+          console.error('保存失败');
+        }
+      };
+
+      const handleWritingChange = (type, value) => {
+        const key = `${selectedDate}-${type}`;
+        const newTexts = { ...writingTexts, [key]: value };
+        setWritingTexts(newTexts);
+        saveWriting(newTexts);
+      };
+
+      const toggleSample = (type) => {
+        const key = `${selectedDate}-${type}`;
+        setShowSamples(prev => ({ ...prev, [key]: !prev[key] }));
+      };
+
+      const exportData = () => {
+        const data = {
+          completedDates,
+          writingTexts,
+          exportDate: new Date().toISOString()
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `学习日历数据_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      };
+
+      const importData = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          try {
+            const data = JSON.parse(e.target.result);
+            if (data.completedDates) {
+              setCompletedDates(data.completedDates);
+              await saveCompleted(data.completedDates);
             }
-            
-            for(var i = 0; i < startDay; i++) {
-                html += '<div class="mini-day empty"></div>';
+            if (data.writingTexts) {
+              setWritingTexts(data.writingTexts);
+              await saveWriting(data.writingTexts);
             }
-            
-            for(var i = 1; i <= total; i++) {
-                var key = year + '-' + month + '-' + i;
-                var cls = completed[key] ? 'completed' : '';
-                html += '<div class="mini-day ' + cls + '" onclick="pickDate(' + i + ')">' + i + '</div>';
-            }
-            
-            document.getElementById('calendar').innerHTML = html;
-        }
+            alert('数据导入成功！');
+          } catch (error) {
+            alert('导入失败，请检查文件格式');
+          }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+      };
 
-        function changeMonth(offset) {
-            month += offset;
-            if(month < 0) { month = 11; year--; }
-            if(month > 11) { month = 0; year++; }
-            selected = null;
-            renderCal();
-            document.getElementById('contentBox').innerHTML = '<div class="empty-state"><p style="font-size:1.1rem">👆 点击日历选择日期查看每日内容</p></div>';
-        }
+      const markComplete = () => {
+        const newCompleted = { ...completedDates, [selectedDate]: true };
+        setCompletedDates(newCompleted);
+        saveCompleted(newCompleted);
+      };
 
-        function pickDate(day) {
-            selected = new Date(year, month, day);
-            jpAns = null;
-            frAns = null;
-            jpShow = false;
-            frShow = false;
-            sShow = false;
-            renderCal();
-            
-            var days = document.querySelectorAll('.mini-day:not(.weekday):not(.empty)');
-            days[day-1].classList.add('selected');
-            
-            showContent();
-        }
+      const getDaysInMonth = (year, month) => {
+        const firstDay = new Date(year, month - 1, 1).getDay();
+        const daysInMonth = new Date(year, month, 0).getDate();
+        const days = [];
+        for (let i = 0; i < firstDay; i++) days.push(null);
+        for (let i = 1; i <= daysInMonth; i++) days.push(i);
+        return days;
+      };
 
-        function getSeed() {
-            var start = new Date(year, 0, 1);
-            return Math.floor((selected - start) / 86400000);
-        }
+      const handleJapaneseAnswer = (idx) => {
+        setJapaneseAnswer(idx);
+      };
 
-        function showContent() {
-            var s = getSeed();
-            var weather = ['晴天','多云','阴天','小雨','晴朗'][s % 5];
-            
-            var qe = db.qe[s % db.qe.length];
-            var qj = db.qj[s % db.qj.length];
-            var qf = db.qf[s % db.qf.length];
-            var ej = db.ej[s % db.ej.length];
-            var ef = db.ef[s % db.ef.length];
-            var cw = db.cw[s % db.cw.length];
-            var er = db.er[s % db.er.length];
-            
-            var h = '<h3 class="date-title">' + year + '年' + (month+1) + '月' + selected.getDate() + '日</h3>';
-            h += '<p class="date-info">' + wkJP[selected.getDay()] + ' / ' + wkFR[selected.getDay()] + ' | 天气：' + weather + '</p>';
-            
-            h += '<div class="section english"><h4>📖 英语每日一句</h4><p style="font-style:italic">"' + qe[0] + '"</p><p style="font-size:0.85rem;color:#666;margin-top:5px">— ' + qe[1] + '</p><p style="font-size:0.85rem;color:#888;margin-top:5px">' + qe[2] + '</p></div>';
-            
-            h += '<div class="section japanese"><h4>🎌 日语每日一句</h4><p>' + qj[0] + '</p><p style="font-size:0.85rem;color:#666;margin-top:5px">— ' + qj[1] + '</p><p style="font-size:0.85rem;color:#888;margin-top:5px">' + qj[2] + '</p></div>';
-            
-            h += '<div class="section french"><h4>🇫🇷 法语每日一句</h4><p style="font-style:italic">"' + qf[0] + '"</p><p style="font-size:0.85rem;color:#666;margin-top:5px">— ' + qf[1] + '</p><p style="font-size:0.85rem;color:#888;margin-top:5px">' + qf[2] + '</p></div>';
-            
-            h += '<div class="exercise"><h4>✍️ 日语练习 (' + ej.l + ')</h4><p>' + ej.q + '</p><div id="jo"></div><button class="btn" onclick="checkJ()">查看答案</button><div id="jr" class="result"></div></div>';
-            
-            h += '<div class="exercise" style="background:#d1fae5"><h4 style="color:#065f46">🇫🇷 法语练习 (' + ef.l + ')</h4><p>' + ef.q + '</p><div id="fo"></div><button class="btn btn-green" onclick="checkF()">查看答案</button><div id="fr" class="result"></div></div>';
-            
-            h += '<div class="section creative"><h4>✨ 创意写作练习</h4><p>' + cw + '</p></div>';
-            
-            h += '<div style="margin-top:10px;padding:5px"><button style="background:transparent;border:none;color:transparent;cursor:pointer;padding:20px 40px" onclick="showE()">.</button><div id="ec" style="display:none;margin-top:10px;padding:15px;background:#fff5f5;border-radius:5px;border-left:3px solid #fca5a5"></div></div>';
-            
-            document.getElementById('contentBox').innerHTML = h;
-            
-            renderOpts('jo', ej.o, 'j');
-            renderOpts('fo', ef.o, 'f');
-        }
+      const handleFrenchAnswer = (idx) => {
+        setFrenchAnswer(idx);
+      };
 
-        function renderOpts(id, opts, type) {
-            var h = '';
-            for(var i = 0; i < opts.length; i++) {
-                h += '<div class="option" id="' + type + i + '" onclick="selectOpt(\'' + type + '\',' + i + ')">' + (i+1) + '. ' + opts[i] + '</div>';
-            }
-            document.getElementById(id).innerHTML = h;
-        }
+      const dayData = data2026[selectedDate];
+      const days = getDaysInMonth(2026, currentMonth);
 
-        function selectOpt(type, i) {
-            if(type === 'j') {
-                if(jpShow) return;
-                jpAns = i;
-                for(var k = 0; k < 3; k++) {
-                    document.getElementById('j'+k).className = 'option' + (k === i ? ' selected' : '');
-                }
-            } else {
-                if(frShow) return;
-                frAns = i;
-                for(var k = 0; k < 3; k++) {
-                    document.getElementById('f'+k).className = 'option' + (k === i ? ' selected' : '');
-                }
-            }
-        }
+      if (!dayData) {
+        return (
+          <div className="container">
+            <div className="calendar-sidebar">
+              <div className="calendar-card">
+                <div className="calendar-header">
+                  <button className="nav-btn" onClick={() => setCurrentMonth(m => Math.max(1, m - 1))} disabled={currentMonth === 1}>←</button>
+                  <div className="month-title">{currentMonth}月</div>
+                  <button className="nav-btn" onClick={() => setCurrentMonth(m => Math.min(12, m + 1))} disabled={currentMonth === 12}>→</button>
+                </div>
+                <div className="weekdays">
+                  {['日','一','二','三','四','五','六'].map(d => <div key={d} className="weekday">{d}</div>)}
+                </div>
+                <div className="days-grid">
+                  {days.map((day, i) => (
+                    <div key={i}>
+                      {day && <button className="day-btn">{day}</button>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="content-area">
+              <div className="content-card">
+                <p style={{textAlign:'center', color:'#6b7280', padding:'4rem'}}>请选择日期查看学习内容</p>
+              </div>
+            </div>
+          </div>
+        );
+      }
 
-        function checkJ() {
-            var s = getSeed();
-            var ej = db.ej[s % db.ej.length];
-            jpShow = true;
-            
-            for(var i = 0; i < 3; i++) {
-                var el = document.getElementById('j'+i);
-                if(i === ej.a) el.className = 'option correct';
-                else if(i === jpAns) el.className = 'option wrong';
-            }
-            
-            document.getElementById('jr').textContent = jpAns === ej.a ? '✓ 正确！' : '✗ 错误，正确答案是选项 ' + (ej.a+1);
-            checkDone();
-        }
+      return (
+        <div className="container">
+          <div className="calendar-sidebar">
+            <div className="calendar-card">
+              <div className="calendar-header">
+                <button className="nav-btn" onClick={() => setCurrentMonth(m => Math.max(1, m - 1))} disabled={currentMonth === 1}>←</button>
+                <div className="month-title">{currentMonth}月</div>
+                <button className="nav-btn" onClick={() => setCurrentMonth(m => Math.min(12, m + 1))} disabled={currentMonth === 12}>→</button>
+              </div>
+              <div className="weekdays">
+                {['日','一','二','三','四','五','六'].map(d => <div key={d} className="weekday">{d}</div>)}
+              </div>
+              <div className="days-grid">
+                {days.map((day, i) => {
+                  const dateKey = day ? `2026-${String(currentMonth).padStart(2,'0')}-${String(day).padStart(2,'0')}` : null;
+                  const isCompleted = dateKey && completedDates[dateKey];
+                  const isSelected = dateKey === selectedDate;
+                  return (
+                    <div key={i}>
+                      {day && (
+                        <button 
+                          className={`day-btn ${isSelected ? 'selected' : ''} ${isCompleted ? 'completed' : ''}`}
+                          onClick={() => dateKey && setSelectedDate(dateKey)}
+                        >
+                          {day}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
 
-        function checkF() {
-            var s = getSeed();
-            var ef = db.ef[s % db.ef.length];
-            frShow = true;
-            
-            for(var i = 0; i < 3; i++) {
-                var el = document.getElementById('f'+i);
-                if(i === ef.a) el.className = 'option correct';
-                else if(i === frAns) el.className = 'option wrong';
-            }
-            
-            document.getElementById('fr').textContent = frAns === ef.a ? '✓ 正确！' : '✗ 错误，正确答案是选项 ' + (ef.a+1);
-            checkDone();
-        }
+          <div className="content-area">
+            <div className="content-card">
+              {/* 日期显示 */}
+              <div className="date-display">
+                <div className="date-row">
+                  <div className="date-item"><strong>中文：</strong>{dayData.date.chinese}</div>
+                  <div className="date-item"><strong>日语：</strong>{dayData.date.japanese}</div>
+                  <div className="date-item"><strong>法语：</strong>{dayData.date.french}</div>
+                </div>
+                <div className="date-row">
+                  <div className="date-item"><strong>星期：</strong>{dayData.date.weekday.cn} / {dayData.date.weekday.jp} / {dayData.date.weekday.fr}</div>
+                  <div className="date-item"><strong>农历：</strong>{dayData.date.lunar}</div>
+                  {dayData.date.holiday && <div className="date-item"><strong>节日：</strong>{dayData.date.holiday}</div>}
+                </div>
+              </div>
 
-        function showE() {
-            sShow = !sShow;
-            var ec = document.getElementById('ec');
-            if(sShow) {
-                var s = getSeed();
-                var er = db.er[s % db.er.length];
-                ec.innerHTML = er;
-                ec.style.display = 'block';
-            } else {
-                ec.style.display = 'none';
-            }
-            checkDone();
-        }
+              {/* 每日一句 */}
+              <div className="section">
+                <div className="section-title">📖 每日一句</div>
+                <div className="quote-box">
+                  <div className="quote-text">{dayData.quotes.english.text}</div>
+                  <div className="quote-source">— {dayData.quotes.english.source}</div>
+                  <div style={{marginTop:'0.5rem',fontSize:'0.9rem',color:'#6b7280'}}>{dayData.quotes.english.translation}</div>
+                </div>
+                <div className="quote-box">
+                  <div className="quote-text" dangerouslySetInnerHTML={{__html: dayData.quotes.japanese.reading}} />
+                  <div className="quote-source">— {dayData.quotes.japanese.source}</div>
+                  <div style={{marginTop:'0.5rem',fontSize:'0.9rem',color:'#6b7280'}}>{dayData.quotes.japanese.translation}</div>
+                </div>
+                <div className="quote-box">
+                  <div className="quote-text">{dayData.quotes.french.text}</div>
+                  <div className="quote-source">— {dayData.quotes.french.source}</div>
+                  <div style={{marginTop:'0.5rem',fontSize:'0.9rem',color:'#6b7280'}}>{dayData.quotes.french.translation}</div>
+                </div>
+              </div>
 
-        function checkDone() {
-            if(jpShow && frShow && sShow) {
-                var key = year + '-' + month + '-' + selected.getDate();
-                completed[key] = true;
-                renderCal();
-                var days = document.querySelectorAll('.mini-day:not(.weekday):not(.empty)');
-                days[selected.getDate()-1].classList.add('selected');
-            }
-        }
+              {/* 日语习题 */}
+              <div className="section">
+                <div className="section-title">🇯🇵 日语习题 (N3)</div>
+                <div className="exercise-box">
+                  <div className="exercise-question">{dayData.japanese.question}</div>
+                  <div className="options">
+                    {dayData.japanese.options.map((opt, idx) => (
+                      <button
+                        key={idx}
+                        className={`option-btn ${japaneseAnswer === idx ? (idx === dayData.japanese.correct ? 'correct' : 'wrong') : ''}`}
+                        onClick={() => handleJapaneseAnswer(idx)}
+                        disabled={japaneseAnswer !== null}
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                  {japaneseAnswer !== null && (
+                    <div className="explanation">
+                      <strong>解析：</strong>{dayData.japanese.explanation}
+                    </div>
+                  )}
+                </div>
+              </div>
 
-        renderCal();
-    </script>
+              {/* 法语习题 */}
+              <div className="section">
+                <div className="section-title">🇫🇷 法语习题 (B1)</div>
+                <div className="exercise-box french">
+                  <div className="exercise-question">{dayData.french.question}</div>
+                  <div className="options">
+                    {dayData.french.options.map((opt, idx) => (
+                      <button
+                        key={idx}
+                        className={`option-btn ${frenchAnswer === idx ? (idx === dayData.french.correct ? 'correct' : 'wrong') : ''}`}
+                        onClick={() => handleFrenchAnswer(idx)}
+                        disabled={frenchAnswer !== null}
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                  {frenchAnswer !== null && (
+                    <div className="explanation">
+                      <strong>解析：</strong>{dayData.french.explanation}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* 创意写作 */}
+              <div className="section">
+                <div className="section-title">✍️ 创意写作</div>
+                <div className="writing-box">
+                  <div className="writing-prompt">{dayData.creative}</div>
+                  <textarea
+                    className="writing-textarea"
+                    placeholder="在此输入你的创作..."
+                    value={writingTexts[`${selectedDate}-creative`] || ''}
+                    onChange={(e) => handleWritingChange('creative', e.target.value)}
+                  />
+                  <div className="char-count">
+                    {(writingTexts[`${selectedDate}-creative`] || '').length} 字
+                  </div>
+                  <button 
+                    className="sample-btn"
+                    onClick={() => toggleSample('creative')}
+                  >
+                    {showSamples[`${selectedDate}-creative`] ? '隐藏范文' : '查看范文'}
+                  </button>
+                  {showSamples[`${selectedDate}-creative`] && (
+                    <div className="sample-content">
+                      <div className="sample-title">📝 参考范文</div>
+                      {dayData.creativeSample}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* 隐藏的情色写作 */}
+              <div className="hidden-section" onClick={() => setShowErotica(!showErotica)}>
+                <div className="hidden-trigger"></div>
+                {showErotica && (
+                  <div className="hidden-content" onClick={e => e.stopPropagation()}>
+                    <div className="writing-prompt">{dayData.erotica}</div>
+                    <textarea
+                      className="writing-textarea"
+                      placeholder="在此输入你的创作..."
+                      value={writingTexts[`${selectedDate}-erotica`] || ''}
+                      onChange={(e) => handleWritingChange('erotica', e.target.value)}
+                    />
+                    <div className="char-count">
+                      {(writingTexts[`${selectedDate}-erotica`] || '').length} 字
+                    </div>
+                    <button 
+                      className="sample-btn"
+                      onClick={() => toggleSample('erotica')}
+                    >
+                      {showSamples[`${selectedDate}-erotica`] ? '隐藏范文' : '查看范文'}
+                    </button>
+                    {showSamples[`${selectedDate}-erotica`] && (
+                      <div className="sample-content">
+                        <div className="sample-title">📝 参考范文</div>
+                        {dayData.eroticaSample}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* 完成打卡 + 导入导出 */}
+              <div>
+                <button 
+                  className={`check-complete-btn ${completedDates[selectedDate] ? 'completed' : ''}`}
+                  onClick={markComplete}
+                >
+                  {completedDates[selectedDate] ? '✓ 已完成' : '标记完成'}
+                </button>
+                <button className="export-btn" onClick={exportData}>
+                  📤 导出数据
+                </button>
+                <label className="import-btn">
+                  📥 导入数据
+                  <input 
+                    type="file" 
+                    accept=".json"
+                    onChange={importData}
+                    className="hidden-file-input"
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
 </body>
 </html>
