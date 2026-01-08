@@ -157,7 +157,15 @@
     // 这里是你原本的逻辑代码（比如生成菱形、处理点击事件等）
     // 只要上面引入了 data.js，这里的代码依然可以读取到 calendarData
 
-let currentShowingDate = "2026-01-01";
+// 获取今天的 YYYY-MM-DD 格式
+const today = new Date();
+const todayStr = today.getFullYear() + '-' + 
+                 String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                 String(today.getDate()).padStart(2, '0');
+
+// 尝试加载今天，如果 data.js 里还没写今天，就默认显示 1月8日
+let currentShowingDate = calendarData.some(d => d.date === todayStr) ? todayStr : "2026-01-08";
+
 let userStorage = JSON.parse(localStorage.getItem('cal_progress_2026')) || {};
 
 function init() {
