@@ -16,18 +16,20 @@
     }
     
     .container {
-      display: flex;
-      gap: 2rem;
-      padding: 2rem;
-      max-width: 1600px;
-      margin: 0 auto;
-    }
+  display: flex;
+  flex-direction: column;  /* 改为纵向 */
+  gap: 1.5rem;
+  padding: 2rem;
+  max-width: 1024px;  /* 改窄一点 */
+  margin: 0 auto;
+}
     
-    /* 左侧日历 */
-    .calendar-sidebar {
-      width: 320px;
-      flex-shrink: 0;
-    }
+    /* 顶部日历 */
+.calendar-sidebar {
+  width: 100%;  /* 改为全宽 */
+  max-width: 600px;  /* 限制最大宽度 */
+  margin: 0 auto;  /* 居中 */
+}
     
     .calendar-card {
       background: white;
@@ -106,11 +108,10 @@
     }
     .day-btn.selected.completed::after { color: #86efac; }
     
-    /* 右侧内容区 */
-    .content-area {
-      flex: 1;
-      min-width: 0;
-    }
+    /* 下方内容区 */
+.content-area {
+  width: 100%;
+}
     
     .content-card {
       background: white;
@@ -387,7 +388,7 @@
     const { useState, useEffect } = React;
 
     function App() {
-      const [selectedDate, setSelectedDate] = useState("2026-01-04");
+      const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
       const [currentMonth, setCurrentMonth] = useState(1);
       const [completedDates, setCompletedDates] = useState({});
       const [japaneseAnswer, setJapaneseAnswer] = useState(null);
