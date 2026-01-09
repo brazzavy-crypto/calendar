@@ -384,162 +384,164 @@
 <body>
   <div id="root"></div>
   <script src="data2026.js"></script>  
-  <script type="text/babel">
-    const { useState, useEffect } = React;
+<script type="text/babel">
+  const { useState, useEffect } = React;
 
-    function App() {
-      const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-      const [currentMonth, setCurrentMonth] = useState(1);
-      const [completedDates, setCompletedDates] = useState({});
-      const [japaneseAnswer, setJapaneseAnswer] = useState(null);
-      const [frenchAnswer, setFrenchAnswer] = useState(null);
-      const [showErotica, setShowErotica] = useState(false);
-      const [writingTexts, setWritingTexts] = useState({});
-      const [showSamples, setShowSamples] = useState({});
+  function App() {
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+    const [currentMonth, setCurrentMonth] = useState(1);
+    const [completedDates, setCompletedDates] = useState({});
+    const [japaneseAnswer, setJapaneseAnswer] = useState(null);
+    const [frenchAnswer, setFrenchAnswer] = useState(null);
+    const [showErotica, setShowErotica] = useState(false);
+    const [writingTexts, setWritingTexts] = useState({});
+    const [showSamples, setShowSamples] = useState({});
+    const [answers, setAnswers] = useState({});
 
-      useEffect(() => {
-        const loadData = async () => {
-          try {
-            const result = await window.storage.get('completed-dates');
-            if (result && result.value) {
-              setCompletedDates(JSON.parse(result.value));
-            }
-            const writingResult = await window.storage.get('writing-texts');
-            if (writingResult && writingResult.value) {
-              setWritingTexts(JSON.parse(writingResult.value));
-            }
-          } catch (error) {
-            console.log('首次使用');
-          }
-        };
-        loadData();
-      }, []);
-
-      const saveCompleted = async (newCompleted) => {
-        try {
-          await window.storage.set('completed-dates', JSON.stringify(newCompleted));
-        } catch (error) {
-          console.error('保存失败');
+    // 加载数据
+    useEffect(() => {
+      try {
+        const completed = localStorage.getItem('completed-dates');
+        if (completed) {
+          setCompletedDates(JSON.parse(completed));
         }
-      };
-
-      const saveWriting = async (newTexts) => {
-        try {
-          await window.storage.set('writing-texts', JSON.stringify(newTexts));
-        } catch (error) {
-          console.error('保存失败');
+        const writing = localStorage.getItem('writing-texts');
+        if (writing) {
+          setWritingTexts(JSON.parse(writing));
         }
-      };
-
-      const handleWritingChange = (type, value) => {
-        const key = `${selectedDate}-${type}`;
-        const newTexts = { ...writingTexts, [key]: value };
-        setWritingTexts(newTexts);
-        saveWriting(newTexts);
-      };
-
-      const toggleSample = (type) => {
-        const key = `${selectedDate}-${type}`;
-        setShowSamples(prev => ({ ...prev, [key]: !prev[key] }));
-      };
-
-      const exportData = () => {
-        const data = {
-          completedDates,
-          writingTexts,
-          exportDate: new Date().toISOString()
-        };
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `学习日历数据_${new Date().toISOString().slice(0,10)}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-      };
-
-      const importData = (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          try {
-            const data = JSON.parse(e.target.result);
-            if (data.completedDates) {
-              setCompletedDates(data.completedDates);
-              await saveCompleted(data.completedDates);
-            }
-            if (data.writingTexts) {
-              setWritingTexts(data.writingTexts);
-              await saveWriting(data.writingTexts);
-            }
-            alert('数据导入成功！');
-          } catch (error) {
-            alert('导入失败，请检查文件格式');
-          }
-        };
-        reader.readAsText(file);
-        event.target.value = '';
-      };
-
-      const markComplete = () => {
-        const newCompleted = { ...completedDates, [selectedDate]: true };
-        setCompletedDates(newCompleted);
-        saveCompleted(newCompleted);
-      };
-
-      const getDaysInMonth = (year, month) => {
-        const firstDay = new Date(year, month - 1, 1).getDay();
-        const daysInMonth = new Date(year, month, 0).getDate();
-        const days = [];
-        for (let i = 0; i < firstDay; i++) days.push(null);
-        for (let i = 1; i <= daysInMonth; i++) days.push(i);
-        return days;
-      };
-
-      const handleJapaneseAnswer = (idx) => {
-        setJapaneseAnswer(idx);
-      };
-
-      const handleFrenchAnswer = (idx) => {
-        setFrenchAnswer(idx);
-      };
-
-      const dayData = data2026[selectedDate];
-      const days = getDaysInMonth(2026, currentMonth);
-
-      if (!dayData) {
-        return (
-          <div className="container">
-            <div className="calendar-sidebar">
-              <div className="calendar-card">
-                <div className="calendar-header">
-                  <button className="nav-btn" onClick={() => setCurrentMonth(m => Math.max(1, m - 1))} disabled={currentMonth === 1}>←</button>
-                  <div className="month-title">{currentMonth}月</div>
-                  <button className="nav-btn" onClick={() => setCurrentMonth(m => Math.min(12, m + 1))} disabled={currentMonth === 12}>→</button>
-                </div>
-                <div className="weekdays">
-                  {['日','一','二','三','四','五','六'].map(d => <div key={d} className="weekday">{d}</div>)}
-                </div>
-                <div className="days-grid">
-                  {days.map((day, i) => (
-                    <div key={i}>
-                      {day && <button className="day-btn">{day}</button>}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="content-area">
-              <div className="content-card">
-                <p style={{textAlign:'center', color:'#6b7280', padding:'4rem'}}>请选择日期查看学习内容</p>
-              </div>
-            </div>
-          </div>
-        );
+        const ans = localStorage.getItem('answers');
+        if (ans) {
+          setAnswers(JSON.parse(ans));
+        }
+      } catch (error) {
+        console.log('首次使用');
       }
+    }, []);
 
+    // 当切换日期时加载该日期的答案
+    useEffect(() => {
+      const japKey = `${selectedDate}-japanese`;
+      const frKey = `${selectedDate}-french`;
+      setJapaneseAnswer(answers[japKey] ?? null);
+      setFrenchAnswer(answers[frKey] ?? null);
+    }, [selectedDate, answers]);
+
+    const saveCompleted = (newCompleted) => {
+      try {
+        localStorage.setItem('completed-dates', JSON.stringify(newCompleted));
+      } catch (error) {
+        console.error('保存失败', error);
+      }
+    };
+
+    const saveWriting = (newTexts) => {
+      try {
+        localStorage.setItem('writing-texts', JSON.stringify(newTexts));
+      } catch (error) {
+        console.error('保存失败', error);
+      }
+    };
+
+    const saveAnswers = (newAnswers) => {
+      try {
+        localStorage.setItem('answers', JSON.stringify(newAnswers));
+      } catch (error) {
+        console.error('保存失败', error);
+      }
+    };
+
+    const handleWritingChange = (type, value) => {
+      const key = `${selectedDate}-${type}`;
+      const newTexts = { ...writingTexts, [key]: value };
+      setWritingTexts(newTexts);
+      saveWriting(newTexts);
+    };
+
+    const toggleSample = (type) => {
+      const key = `${selectedDate}-${type}`;
+      setShowSamples(prev => ({ ...prev, [key]: !prev[key] }));
+    };
+
+    const exportData = () => {
+      const data = {
+        completedDates,
+        writingTexts,
+        answers,
+        exportDate: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `学习日历数据_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    const importData = (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.completedDates) {
+            setCompletedDates(data.completedDates);
+            saveCompleted(data.completedDates);
+          }
+          if (data.writingTexts) {
+            setWritingTexts(data.writingTexts);
+            saveWriting(data.writingTexts);
+          }
+          if (data.answers) {
+            setAnswers(data.answers);
+            saveAnswers(data.answers);
+          }
+          alert('数据导入成功！');
+        } catch (error) {
+          alert('导入失败，请检查文件格式');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    };
+
+    const markComplete = () => {
+      const newCompleted = { ...completedDates, [selectedDate]: true };
+      setCompletedDates(newCompleted);
+      saveCompleted(newCompleted);
+    };
+
+    const getDaysInMonth = (year, month) => {
+      const firstDay = new Date(year, month - 1, 1).getDay();
+      const daysInMonth = new Date(year, month, 0).getDate();
+      const days = [];
+      for (let i = 0; i < firstDay; i++) days.push(null);
+      for (let i = 1; i <= daysInMonth; i++) days.push(i);
+      return days;
+    };
+
+    const handleJapaneseAnswer = (idx) => {
+      setJapaneseAnswer(idx);
+      const key = `${selectedDate}-japanese`;
+      const newAnswers = { ...answers, [key]: idx };
+      setAnswers(newAnswers);
+      saveAnswers(newAnswers);
+    };
+
+    const handleFrenchAnswer = (idx) => {
+      setFrenchAnswer(idx);
+      const key = `${selectedDate}-french`;
+      const newAnswers = { ...answers, [key]: idx };
+      setAnswers(newAnswers);
+      saveAnswers(newAnswers);
+    };
+
+    const dayData = data2026[selectedDate];
+    const days = getDaysInMonth(2026, currentMonth);
+
+    if (!dayData) {
       return (
         <div className="container">
           <div className="calendar-sidebar">
@@ -553,201 +555,231 @@
                 {['日','一','二','三','四','五','六'].map(d => <div key={d} className="weekday">{d}</div>)}
               </div>
               <div className="days-grid">
-                {days.map((day, i) => {
-                  const dateKey = day ? `2026-${String(currentMonth).padStart(2,'0')}-${String(day).padStart(2,'0')}` : null;
-                  const isCompleted = dateKey && completedDates[dateKey];
-                  const isSelected = dateKey === selectedDate;
-                  return (
-                    <div key={i}>
-                      {day && (
-                        <button 
-                          className={`day-btn ${isSelected ? 'selected' : ''} ${isCompleted ? 'completed' : ''}`}
-                          onClick={() => dateKey && setSelectedDate(dateKey)}
-                        >
-                          {day}
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
+                {days.map((day, i) => (
+                  <div key={i}>
+                    {day && <button className="day-btn">{day}</button>}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
-
           <div className="content-area">
             <div className="content-card">
-              {/* 日期显示 */}
-              <div className="date-display">
-                <div className="date-row">
-                  <div className="date-item"><strong>中文：</strong>{dayData.date.chinese}</div>
-                  <div className="date-item"><strong>日语：</strong>{dayData.date.japanese}</div>
-                  <div className="date-item"><strong>法语：</strong>{dayData.date.french}</div>
-                </div>
-                <div className="date-row">
-                  <div className="date-item"><strong>星期：</strong>{dayData.date.weekday.cn} / {dayData.date.weekday.jp} / {dayData.date.weekday.fr}</div>
-                  <div className="date-item"><strong>农历：</strong>{dayData.date.lunar}</div>
-                  {dayData.date.holiday && <div className="date-item"><strong>节日：</strong>{dayData.date.holiday}</div>}
-                </div>
-              </div>
-
-              {/* 每日一句 */}
-              <div className="section">
-                <div className="section-title">📖 每日一句</div>
-                <div className="quote-box">
-                  <div className="quote-text">{dayData.quotes.english.text}</div>
-                  <div className="quote-source">— {dayData.quotes.english.source}</div>
-                  <div style={{marginTop:'0.5rem',fontSize:'0.9rem',color:'#6b7280'}}>{dayData.quotes.english.translation}</div>
-                </div>
-                <div className="quote-box">
-                  <div className="quote-text" dangerouslySetInnerHTML={{__html: dayData.quotes.japanese.reading}} />
-                  <div className="quote-source">— {dayData.quotes.japanese.source}</div>
-                  <div style={{marginTop:'0.5rem',fontSize:'0.9rem',color:'#6b7280'}}>{dayData.quotes.japanese.translation}</div>
-                </div>
-                <div className="quote-box">
-                  <div className="quote-text">{dayData.quotes.french.text}</div>
-                  <div className="quote-source">— {dayData.quotes.french.source}</div>
-                  <div style={{marginTop:'0.5rem',fontSize:'0.9rem',color:'#6b7280'}}>{dayData.quotes.french.translation}</div>
-                </div>
-              </div>
-
-              {/* 日语习题 */}
-              <div className="section">
-                <div className="section-title">🇯🇵 日语习题 (N3)</div>
-                <div className="exercise-box">
-                  <div className="exercise-question">{dayData.japanese.question}</div>
-                  <div className="options">
-                    {dayData.japanese.options.map((opt, idx) => (
-                      <button
-                        key={idx}
-                        className={`option-btn ${japaneseAnswer === idx ? (idx === dayData.japanese.correct ? 'correct' : 'wrong') : ''}`}
-                        onClick={() => handleJapaneseAnswer(idx)}
-                        disabled={japaneseAnswer !== null}
-                      >
-                        {opt}
-                      </button>
-                    ))}
-                  </div>
-                  {japaneseAnswer !== null && (
-                    <div className="explanation">
-                      <strong>解析：</strong>{dayData.japanese.explanation}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* 法语习题 */}
-              <div className="section">
-                <div className="section-title">🇫🇷 法语习题 (B1)</div>
-                <div className="exercise-box french">
-                  <div className="exercise-question">{dayData.french.question}</div>
-                  <div className="options">
-                    {dayData.french.options.map((opt, idx) => (
-                      <button
-                        key={idx}
-                        className={`option-btn ${frenchAnswer === idx ? (idx === dayData.french.correct ? 'correct' : 'wrong') : ''}`}
-                        onClick={() => handleFrenchAnswer(idx)}
-                        disabled={frenchAnswer !== null}
-                      >
-                        {opt}
-                      </button>
-                    ))}
-                  </div>
-                  {frenchAnswer !== null && (
-                    <div className="explanation">
-                      <strong>解析：</strong>{dayData.french.explanation}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* 创意写作 */}
-              <div className="section">
-                <div className="section-title">✍️ 创意写作</div>
-                <div className="writing-box">
-                  <div className="writing-prompt">{dayData.creative}</div>
-                  <textarea
-                    className="writing-textarea"
-                    placeholder="在此输入你的创作..."
-                    value={writingTexts[`${selectedDate}-creative`] || ''}
-                    onChange={(e) => handleWritingChange('creative', e.target.value)}
-                  />
-                  <div className="char-count">
-                    {(writingTexts[`${selectedDate}-creative`] || '').length} 字
-                  </div>
-                  <button 
-                    className="sample-btn"
-                    onClick={() => toggleSample('creative')}
-                  >
-                    {showSamples[`${selectedDate}-creative`] ? '隐藏范文' : '查看范文'}
-                  </button>
-                  {showSamples[`${selectedDate}-creative`] && (
-                    <div className="sample-content">
-                      <div className="sample-title">📝 参考范文</div>
-                      {dayData.creativeSample}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* 隐藏的情色写作 */}
-              <div className="hidden-section" onClick={() => setShowErotica(!showErotica)}>
-                <div className="hidden-trigger"></div>
-                {showErotica && (
-                  <div className="hidden-content" onClick={e => e.stopPropagation()}>
-                    <div className="writing-prompt">{dayData.erotica}</div>
-                    <textarea
-                      className="writing-textarea"
-                      placeholder="在此输入你的创作..."
-                      value={writingTexts[`${selectedDate}-erotica`] || ''}
-                      onChange={(e) => handleWritingChange('erotica', e.target.value)}
-                    />
-                    <div className="char-count">
-                      {(writingTexts[`${selectedDate}-erotica`] || '').length} 字
-                    </div>
-                    <button 
-                      className="sample-btn"
-                      onClick={() => toggleSample('erotica')}
-                    >
-                      {showSamples[`${selectedDate}-erotica`] ? '隐藏范文' : '查看范文'}
-                    </button>
-                    {showSamples[`${selectedDate}-erotica`] && (
-                      <div className="sample-content">
-                        <div className="sample-title">📝 参考范文</div>
-                        {dayData.eroticaSample}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* 完成打卡 + 导入导出 */}
-              <div>
-                <button 
-                  className={`check-complete-btn ${completedDates[selectedDate] ? 'completed' : ''}`}
-                  onClick={markComplete}
-                >
-                  {completedDates[selectedDate] ? '✓ 已完成' : '标记完成'}
-                </button>
-                <button className="export-btn" onClick={exportData}>
-                  📤 导出数据
-                </button>
-                <label className="import-btn">
-                  📥 导入数据
-                  <input 
-                    type="file" 
-                    accept=".json"
-                    onChange={importData}
-                    className="hidden-file-input"
-                  />
-                </label>
-              </div>
+              <p style={{textAlign:'center', color:'#6b7280', padding:'4rem'}}>请选择日期查看学习内容</p>
             </div>
           </div>
         </div>
       );
     }
 
-    ReactDOM.render(<App />, document.getElementById('root'));
-  </script>
+    return (
+      <div className="container">
+        <div className="calendar-sidebar">
+          <div className="calendar-card">
+            <div className="calendar-header">
+              <button className="nav-btn" onClick={() => setCurrentMonth(m => Math.max(1, m - 1))} disabled={currentMonth === 1}>←</button>
+              <div className="month-title">{currentMonth}月</div>
+              <button className="nav-btn" onClick={() => setCurrentMonth(m => Math.min(12, m + 1))} disabled={currentMonth === 12}>→</button>
+            </div>
+            <div className="weekdays">
+              {['日','一','二','三','四','五','六'].map(d => <div key={d} className="weekday">{d}</div>)}
+            </div>
+            <div className="days-grid">
+              {days.map((day, i) => {
+                const dateKey = day ? `2026-${String(currentMonth).padStart(2,'0')}-${String(day).padStart(2,'0')}` : null;
+                const isCompleted = dateKey && completedDates[dateKey];
+                const isSelected = dateKey === selectedDate;
+                return (
+                  <div key={i}>
+                    {day && (
+                      <button 
+                        className={`day-btn ${isSelected ? 'selected' : ''} ${isCompleted ? 'completed' : ''}`}
+                        onClick={() => dateKey && setSelectedDate(dateKey)}
+                      >
+                        {day}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className="content-area">
+          <div className="content-card">
+            {/* 日期显示 */}
+            <div className="date-display">
+              <div className="date-row">
+                <div className="date-item"><strong>中文：</strong>{dayData.date.chinese}</div>
+                <div className="date-item"><strong>日语：</strong>{dayData.date.japanese}</div>
+                <div className="date-item"><strong>法语：</strong>{dayData.date.french}</div>
+              </div>
+              <div className="date-row">
+                <div className="date-item"><strong>星期：</strong>{dayData.date.weekday.cn} / {dayData.date.weekday.jp} / {dayData.date.weekday.fr}</div>
+                <div className="date-item"><strong>农历：</strong>{dayData.date.lunar}</div>
+                {dayData.date.holiday && <div className="date-item"><strong>节日：</strong>{dayData.date.holiday}</div>}
+              </div>
+            </div>
+
+            {/* 每日一句 */}
+            <div className="section">
+              <div className="section-title">📖 每日一句</div>
+              <div className="quote-box">
+                <div className="quote-text">{dayData.quotes.english.text}</div>
+                <div className="quote-source">— {dayData.quotes.english.source}</div>
+                <div style={{marginTop:'0.5rem',fontSize:'0.9rem',color:'#6b7280'}}>{dayData.quotes.english.translation}</div>
+              </div>
+              <div className="quote-box">
+                <div className="quote-text" dangerouslySetInnerHTML={{__html: dayData.quotes.japanese.reading}} />
+                <div className="quote-source">— {dayData.quotes.japanese.source}</div>
+                <div style={{marginTop:'0.5rem',fontSize:'0.9rem',color:'#6b7280'}}>{dayData.quotes.japanese.translation}</div>
+              </div>
+              <div className="quote-box">
+                <div className="quote-text">{dayData.quotes.french.text}</div>
+                <div className="quote-source">— {dayData.quotes.french.source}</div>
+                <div style={{marginTop:'0.5rem',fontSize:'0.9rem',color:'#6b7280'}}>{dayData.quotes.french.translation}</div>
+              </div>
+            </div>
+
+            {/* 日语习题 */}
+            <div className="section">
+              <div className="section-title">🇯🇵 日语习题 (N3)</div>
+              <div className="exercise-box">
+                <div className="exercise-question">{dayData.japanese.question}</div>
+                <div className="options">
+                  {dayData.japanese.options.map((opt, idx) => (
+                    <button
+                      key={idx}
+                      className={`option-btn ${japaneseAnswer === idx ? (idx === dayData.japanese.correct ? 'correct' : 'wrong') : ''}`}
+                      onClick={() => handleJapaneseAnswer(idx)}
+                      disabled={japaneseAnswer !== null}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+                {japaneseAnswer !== null && (
+                  <div className="explanation">
+                    <strong>解析：</strong>{dayData.japanese.explanation}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 法语习题 */}
+            <div className="section">
+              <div className="section-title">🇫🇷 法语习题 (B1)</div>
+              <div className="exercise-box french">
+                <div className="exercise-question">{dayData.french.question}</div>
+                <div className="options">
+                  {dayData.french.options.map((opt, idx) => (
+                    <button
+                      key={idx}
+                      className={`option-btn ${frenchAnswer === idx ? (idx === dayData.french.correct ? 'correct' : 'wrong') : ''}`}
+                      onClick={() => handleFrenchAnswer(idx)}
+                      disabled={frenchAnswer !== null}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+                {frenchAnswer !== null && (
+                  <div className="explanation">
+                    <strong>解析：</strong>{dayData.french.explanation}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 创意写作 */}
+            <div className="section">
+              <div className="section-title">✏️ 创意写作</div>
+              <div className="writing-box">
+                <div className="writing-prompt">{dayData.creative}</div>
+                <textarea
+                  className="writing-textarea"
+                  placeholder="在此输入你的创作..."
+                  value={writingTexts[`${selectedDate}-creative`] || ''}
+                  onChange={(e) => handleWritingChange('creative', e.target.value)}
+                />
+                <div className="char-count">
+                  {(writingTexts[`${selectedDate}-creative`] || '').length} 字
+                </div>
+                <button 
+                  className="sample-btn"
+                  onClick={() => toggleSample('creative')}
+                >
+                  {showSamples[`${selectedDate}-creative`] ? '隐藏范文' : '查看范文'}
+                </button>
+                {showSamples[`${selectedDate}-creative`] && (
+                  <div className="sample-content">
+                    <div className="sample-title">📝 参考范文</div>
+                    {dayData.creativeSample}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 隐藏的情色写作 */}
+            <div className="hidden-section" onClick={() => setShowErotica(!showErotica)}>
+              <div className="hidden-trigger"></div>
+              {showErotica && (
+                <div className="hidden-content" onClick={e => e.stopPropagation()}>
+                  <div className="writing-prompt">{dayData.erotica}</div>
+                  <textarea
+                    className="writing-textarea"
+                    placeholder="在此输入你的创作..."
+                    value={writingTexts[`${selectedDate}-erotica`] || ''}
+                    onChange={(e) => handleWritingChange('erotica', e.target.value)}
+                  />
+                  <div className="char-count">
+                    {(writingTexts[`${selectedDate}-erotica`] || '').length} 字
+                  </div>
+                  <button 
+                    className="sample-btn"
+                    onClick={() => toggleSample('erotica')}
+                  >
+                    {showSamples[`${selectedDate}-erotica`] ? '隐藏范文' : '查看范文'}
+                  </button>
+                  {showSamples[`${selectedDate}-erotica`] && (
+                    <div className="sample-content">
+                      <div className="sample-title">📝 参考范文</div>
+                      {dayData.eroticaSample}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* 完成打卡 + 导入导出 */}
+            <div>
+              <button 
+                className={`check-complete-btn ${completedDates[selectedDate] ? 'completed' : ''}`}
+                onClick={markComplete}
+              >
+                {completedDates[selectedDate] ? '✓ 已完成' : '标记完成'}
+              </button>
+              <button className="export-btn" onClick={exportData}>
+                📤 导出数据
+              </button>
+              <label className="import-btn">
+                📥 导入数据
+                <input 
+                  type="file" 
+                  accept=".json"
+                  onChange={importData}
+                  className="hidden-file-input"
+                />
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  ReactDOM.render(<App />, document.getElementById('root'));
+</script>
 </body>
 </html>
