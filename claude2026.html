@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026学习日历</title>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #faf5ff 0%, #fce7f3 100%);
+      min-height: 100vh;
+    }
+    
+    .container {
+  display: flex;
+  flex-direction: column;  /* 改为纵向 */
+  gap: 1.5rem;
+  padding: 2rem;
+  max-width: 1024px;  /* 改窄一点 */
+  margin: 0 auto;
+}
+    
+    /* 顶部日历 */
+.calendar-sidebar {
+  width: 100%;  /* 改为全宽 */
+  max-width: 600px;  /* 限制最大宽度 */
+  margin: 0 auto;  /* 居中 */
+}
+    
+    .calendar-card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+    }
+    
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .month-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #9333ea;
+    }
+    
+    .nav-btn {
+      background: #f3e8ff;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      cursor: pointer;
+      color: #7c3aed;
+      font-size: 0.9rem;
+    }
+    
+    .nav-btn:hover { background: #e9d5ff; }
+    .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    
+    .weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.25rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .weekday {
+      text-align: center;
+      font-size: 0.75rem;
+      color: #6b7280;
+      padding: 0.25rem;
+    }
+    
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.25rem;
+    }
+    
+    .day-btn {
+      aspect-ratio: 1;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      background: white;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+      position: relative;
+    }
+    
+    .day-btn:hover { background: #f9fafb; }
+    .day-btn.selected { background: #9333ea; color: white; border-color: #9333ea; }
+    .day-btn.completed::after {
+      content: '✓';
+      position: absolute;
+      top: 2px;
+      right: 4px;
+      font-size: 0.7rem;
+      color: #16a34a;
+      font-weight: bold;
+    }
+    .day-btn.selected.completed::after { color: #86efac; }
+    
+    /* 下方内容区 */
+.content-area {
+  width: 100%;
+}
+    
+    .content-card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .date-display {
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid #f3f4f6;
+    }
+    
+    .date-row {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .date-item {
+      font-size: 1rem;
+    }
+    
+    .date-item strong {
+      color: #6b7280;
+      margin-right: 0.5rem;
+    }
+    
+    ruby rt { font-size: 0.6em; }
+    
+    .section {
+      margin-bottom: 2rem;
+    }
+    
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: #1f2937;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .quote-box {
+      background: #fef3c7;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 0.75rem;
+      border-left: 4px solid #f59e0b;
+    }
+    
+    .quote-text {
+      font-style: italic;
+      margin-bottom: 0.5rem;
+      line-height: 1.6;
+    }
+    
+    .quote-source {
+      font-size: 0.875rem;
+      color: #6b7280;
+      text-align: right;
+    }
+    
+    .exercise-box {
+      background: #dbeafe;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      margin-bottom: 1rem;
+      border-left: 4px solid #3b82f6;
+    }
+    
+    .exercise-box.french {
+      background: #e0e7ff;
+      border-left-color: #6366f1;
+    }
+    
+    .exercise-question {
+      font-weight: 500;
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+    
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .option-btn {
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+    
+    .option-btn:hover { border-color: #9ca3af; }
+    .option-btn.selected { border-color: #3b82f6; background: #eff6ff; }
+    .option-btn.correct { border-color: #16a34a; background: #f0fdf4; }
+    .option-btn.wrong { border-color: #dc2626; background: #fef2f2; }
+    
+    .explanation {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: white;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      color: #4b5563;
+    }
+    
+    .writing-box {
+      background: #f0fdf4;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      margin-bottom: 1rem;
+      border-left: 4px solid #16a34a;
+    }
+    
+    .writing-prompt {
+      font-weight: 500;
+      margin-bottom: 1rem;
+      line-height: 1.6;
+    }
+    
+    .writing-textarea {
+      width: 100%;
+      min-height: 150px;
+      padding: 1rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      font-family: inherit;
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+    
+    .writing-textarea:focus {
+      outline: none;
+      border-color: #16a34a;
+    }
+    
+    .char-count {
+      text-align: right;
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-top: 0.5rem;
+    }
+    
+    /* 隐藏的情色写作 */
+    .hidden-section {
+      margin: 2rem 0;
+      padding: 1rem;
+      background: rgba(250, 245, 255, 0.3);
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .hidden-section:hover {
+      background: rgba(250, 245, 255, 0.5);
+    }
+    
+    .hidden-trigger {
+      height: 20px;
+    }
+    
+    .hidden-content {
+      background: #fef2f2;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      border-left: 4px solid #f87171;
+      margin-top: 0.5rem;
+    }
+    
+    .check-complete-btn {
+      background: #9333ea;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 1rem;
+      margin-right: 0.5rem;
+      transition: all 0.2s;
+    }
+    
+    .check-complete-btn:hover {
+      background: #7c3aed;
+    }
+    
+    .check-complete-btn.completed {
+      background: #16a34a;
+    }
+    
+    .export-btn {
+      background: #0891b2;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 1rem;
+      margin-right: 0.5rem;
+      transition: all 0.2s;
+    }
+    
+    .export-btn:hover {
+      background: #0e7490;
+    }
+    
+    .import-btn {
+      background: #059669;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 1rem;
+      transition: all 0.2s;
+    }
+    
+    .import-btn:hover {
+      background: #047857;
+    }
+    
+    .sample-btn {
+      background: #f59e0b;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      transition: all 0.2s;
+    }
+    
+    .sample-btn:hover {
+      background: #d97706;
+    }
+    
+    .sample-content {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: white;
+      border-radius: 0.5rem;
+      border: 2px solid #fbbf24;
+      line-height: 1.8;
+    }
+    
+    .sample-title {
+      font-weight: bold;
+      color: #d97706;
+      margin-bottom: 0.5rem;
+    }
+    
+    .hidden-file-input {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="data2026.js"></script>  
+<script type="text/babel">
+  const { useState, useEffect } = React;
+
+  function App() {
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+    const [currentMonth, setCurrentMonth] = useState(1);
+    const [completedDates, setCompletedDates] = useState({});
+    const [japaneseAnswer, setJapaneseAnswer] = useState(null);
+    const [frenchAnswer, setFrenchAnswer] = useState(null);
+    const [showErotica, setShowErotica] = useState(false);
+    const [writingTexts, setWritingTexts] = useState({});
+    const [showSamples, setShowSamples] = useState({});
+    const [answers, setAnswers] = useState({});
+
+    // 加载数据
+    useEffect(() => {
+      try {
+        const completed = localStorage.getItem('completed-dates');
+        if (completed) {
+          setCompletedDates(JSON.parse(completed));
+        }
+        const writing = localStorage.getItem('writing-texts');
+        if (writing) {
+          setWritingTexts(JSON.parse(writing));
+        }
+        const ans = localStorage.getItem('answers');
+        if (ans) {
+          setAnswers(JSON.parse(ans));
+        }
+      } catch (error) {
+        console.log('首次使用');
+      }
+    }, []);
+
+    // 当切换日期时加载该日期的答案
+    useEffect(() => {
+      const japKey = `${selectedDate}-japanese`;
+      const frKey = `${selectedDate}-french`;
+      setJapaneseAnswer(answers[japKey] ?? null);
+      setFrenchAnswer(answers[frKey] ?? null);
+    }, [selectedDate, answers]);
+
+    const saveCompleted = (newCompleted) => {
+      try {
+        localStorage.setItem('completed-dates', JSON.stringify(newCompleted));
+      } catch (error) {
+        console.error('保存失败', error);
+      }
+    };
+
+    const saveWriting = (newTexts) => {
+      try {
+        localStorage.setItem('writing-texts', JSON.stringify(newTexts));
+      } catch (error) {
+        console.error('保存失败', error);
+      }
+    };
+
+    const saveAnswers = (newAnswers) => {
+      try {
+        localStorage.setItem('answers', JSON.stringify(newAnswers));
+      } catch (error) {
+        console.error('保存失败', error);
+      }
+    };
+
+    const handleWritingChange = (type, value) => {
+      const key = `${selectedDate}-${type}`;
+      const newTexts = { ...writingTexts, [key]: value };
+      setWritingTexts(newTexts);
+      saveWriting(newTexts);
+    };
+
+    const toggleSample = (type) => {
+      const key = `${selectedDate}-${type}`;
+      setShowSamples(prev => ({ ...prev, [key]: !prev[key] }));
+    };
+
+    const exportData = () => {
+      const data = {
+        completedDates,
+        writingTexts,
+        answers,
+        exportDate: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `学习日历数据_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    const importData = (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.completedDates) {
+            setCompletedDates(data.completedDates);
+            saveCompleted(data.completedDates);
+          }
+          if (data.writingTexts) {
+            setWritingTexts(data.writingTexts);
+            saveWriting(data.writingTexts);
+          }
+          if (data.answers) {
+            setAnswers(data.answers);
+            saveAnswers(data.answers);
+          }
+          alert('数据导入成功！');
+        } catch (error) {
+          alert('导入失败，请检查文件格式');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    };
+
+    const markComplete = () => {
+      const newCompleted = { ...completedDates, [selectedDate]: true };
+      setCompletedDates(newCompleted);
+      saveCompleted(newCompleted);
+    };
+
+    const getDaysInMonth = (year, month) => {
+      const firstDay = new Date(year, month - 1, 1).getDay();
+      const daysInMonth = new Date(year, month, 0).getDate();
+      const days = [];
+      for (let i = 0; i < firstDay; i++) days.push(null);
+      for (let i = 1; i <= daysInMonth; i++) days.push(i);
+      return days;
+    };
+
+    const handleJapaneseAnswer = (idx) => {
+      setJapaneseAnswer(idx);
+      const key = `${selectedDate}-japanese`;
+      const newAnswers = { ...answers, [key]: idx };
+      setAnswers(newAnswers);
+      saveAnswers(newAnswers);
+    };
+
+    const handleFrenchAnswer = (idx) => {
+      setFrenchAnswer(idx);
+      const key = `${selectedDate}-french`;
+      const newAnswers = { ...answers, [key]: idx };
+      setAnswers(newAnswers);
+      saveAnswers(newAnswers);
+    };
+
+    const dayData = data2026[selectedDate];
+    const days = getDaysInMonth(2026, currentMonth);
+
+    if (!dayData) {
+      return (
+        <div className="container">
+          <div className="calendar-sidebar">
+            <div className="calendar-card">
+              <div className="calendar-header">
+                <button className="nav-btn" onClick={() => setCurrentMonth(m => Math.max(1, m - 1))} disabled={currentMonth === 1}>←</button>
+                <div className="month-title">{currentMonth}月</div>
+                <button className="nav-btn" onClick={() => setCurrentMonth(m => Math.min(12, m + 1))} disabled={currentMonth === 12}>→</button>
+              </div>
+              <div className="weekdays">
+                {['日','一','二','三','四','五','六'].map(d => <div key={d} className="weekday">{d}</div>)}
+              </div>
+              <div className="days-grid">
+                {days.map((day, i) => (
+                  <div key={i}>
+                    {day && <button className="day-btn">{day}</button>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="content-area">
+            <div className="content-card">
+              <p style={{textAlign:'center', color:'#6b7280', padding:'4rem'}}>请选择日期查看学习内容</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="container">
+        <div className="calendar-sidebar">
+          <div className="calendar-card">
+            <div className="calendar-header">
+              <button className="nav-btn" onClick={() => setCurrentMonth(m => Math.max(1, m - 1))} disabled={currentMonth === 1}>←</button>
+              <div className="month-title">{currentMonth}月</div>
+              <button className="nav-btn" onClick={() => setCurrentMonth(m => Math.min(12, m + 1))} disabled={currentMonth === 12}>→</button>
+            </div>
+            <div className="weekdays">
+              {['日','一','二','三','四','五','六'].map(d => <div key={d} className="weekday">{d}</div>)}
+            </div>
+            <div className="days-grid">
+              {days.map((day, i) => {
+                const dateKey = day ? `2026-${String(currentMonth).padStart(2,'0')}-${String(day).padStart(2,'0')}` : null;
+                const isCompleted = dateKey && completedDates[dateKey];
+                const isSelected = dateKey === selectedDate;
+                return (
+                  <div key={i}>
+                    {day && (
+                      <button 
+                        className={`day-btn ${isSelected ? 'selected' : ''} ${isCompleted ? 'completed' : ''}`}
+                        onClick={() => dateKey && setSelectedDate(dateKey)}
+                      >
+                        {day}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className="content-area">
+          <div className="content-card">
+            {/* 日期显示 */}
+            <div className="date-display">
+              <div className="date-row">
+                <div className="date-item"><strong>中文：</strong>{dayData.date.chinese}</div>
+                <div className="date-item"><strong>日语：</strong>{dayData.date.japanese}</div>
+                <div className="date-item"><strong>法语：</strong>{dayData.date.french}</div>
+              </div>
+              <div className="date-row">
+                <div className="date-item"><strong>星期：</strong>{dayData.date.weekday.cn} / {dayData.date.weekday.jp} / {dayData.date.weekday.fr}</div>
+                <div className="date-item"><strong>农历：</strong>{dayData.date.lunar}</div>
+                {dayData.date.holiday && <div className="date-item"><strong>节日：</strong>{dayData.date.holiday}</div>}
+              </div>
+            </div>
+
+            {/* 每日一句 */}
+            <div className="section">
+              <div className="section-title">📖 每日一句</div>
+              <div className="quote-box">
+                <div className="quote-text">{dayData.quotes.english.text}</div>
+                <div className="quote-source">— {dayData.quotes.english.source}</div>
+                <div style={{marginTop:'0.5rem',fontSize:'0.9rem',color:'#6b7280'}}>{dayData.quotes.english.translation}</div>
+              </div>
+              <div className="quote-box">
+                <div className="quote-text" dangerouslySetInnerHTML={{__html: dayData.quotes.japanese.reading}} />
+                <div className="quote-source">— {dayData.quotes.japanese.source}</div>
+                <div style={{marginTop:'0.5rem',fontSize:'0.9rem',color:'#6b7280'}}>{dayData.quotes.japanese.translation}</div>
+              </div>
+              <div className="quote-box">
+                <div className="quote-text">{dayData.quotes.french.text}</div>
+                <div className="quote-source">— {dayData.quotes.french.source}</div>
+                <div style={{marginTop:'0.5rem',fontSize:'0.9rem',color:'#6b7280'}}>{dayData.quotes.french.translation}</div>
+              </div>
+            </div>
+
+            {/* 日语习题 */}
+            <div className="section">
+              <div className="section-title">🇯🇵 日语习题 (N3)</div>
+              <div className="exercise-box">
+                <div className="exercise-question">{dayData.japanese.question}</div>
+                <div className="options">
+                  {dayData.japanese.options.map((opt, idx) => (
+                    <button
+                      key={idx}
+                      className={`option-btn ${japaneseAnswer === idx ? (idx === dayData.japanese.correct ? 'correct' : 'wrong') : ''}`}
+                      onClick={() => handleJapaneseAnswer(idx)}
+                      disabled={japaneseAnswer !== null}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+                {japaneseAnswer !== null && (
+                  <div className="explanation">
+                    <strong>解析：</strong>{dayData.japanese.explanation}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 法语习题 */}
+            <div className="section">
+              <div className="section-title">🇫🇷 法语习题 (B1)</div>
+              <div className="exercise-box french">
+                <div className="exercise-question">{dayData.french.question}</div>
+                <div className="options">
+                  {dayData.french.options.map((opt, idx) => (
+                    <button
+                      key={idx}
+                      className={`option-btn ${frenchAnswer === idx ? (idx === dayData.french.correct ? 'correct' : 'wrong') : ''}`}
+                      onClick={() => handleFrenchAnswer(idx)}
+                      disabled={frenchAnswer !== null}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+                {frenchAnswer !== null && (
+                  <div className="explanation">
+                    <strong>解析：</strong>{dayData.french.explanation}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 创意写作 */}
+            <div className="section">
+              <div className="section-title">✏️ 创意写作</div>
+              <div className="writing-box">
+                <div className="writing-prompt">{dayData.creative}</div>
+                <textarea
+                  className="writing-textarea"
+                  placeholder="在此输入你的创作..."
+                  value={writingTexts[`${selectedDate}-creative`] || ''}
+                  onChange={(e) => handleWritingChange('creative', e.target.value)}
+                />
+                <div className="char-count">
+                  {(writingTexts[`${selectedDate}-creative`] || '').length} 字
+                </div>
+                <button 
+                  className="sample-btn"
+                  onClick={() => toggleSample('creative')}
+                >
+                  {showSamples[`${selectedDate}-creative`] ? '隐藏范文' : '查看范文'}
+                </button>
+                {showSamples[`${selectedDate}-creative`] && (
+                  <div className="sample-content">
+                    <div className="sample-title">📝 参考范文</div>
+                    {dayData.creativeSample}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 隐藏的情色写作 */}
+            <div className="hidden-section" onClick={() => setShowErotica(!showErotica)}>
+              <div className="hidden-trigger"></div>
+              {showErotica && (
+                <div className="hidden-content" onClick={e => e.stopPropagation()}>
+                  <div className="writing-prompt">{dayData.erotica}</div>
+                  <textarea
+                    className="writing-textarea"
+                    placeholder="在此输入你的创作..."
+                    value={writingTexts[`${selectedDate}-erotica`] || ''}
+                    onChange={(e) => handleWritingChange('erotica', e.target.value)}
+                  />
+                  <div className="char-count">
+                    {(writingTexts[`${selectedDate}-erotica`] || '').length} 字
+                  </div>
+                  <button 
+                    className="sample-btn"
+                    onClick={() => toggleSample('erotica')}
+                  >
+                    {showSamples[`${selectedDate}-erotica`] ? '隐藏范文' : '查看范文'}
+                  </button>
+                  {showSamples[`${selectedDate}-erotica`] && (
+                    <div className="sample-content">
+                      <div className="sample-title">📝 参考范文</div>
+                      {dayData.eroticaSample}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* 完成打卡 + 导入导出 */}
+            <div>
+              <button 
+                className={`check-complete-btn ${completedDates[selectedDate] ? 'completed' : ''}`}
+                onClick={markComplete}
+              >
+                {completedDates[selectedDate] ? '✓ 已完成' : '标记完成'}
+              </button>
+              <button className="export-btn" onClick={exportData}>
+                📤 导出数据
+              </button>
+              <label className="import-btn">
+                📥 导入数据
+                <input 
+                  type="file" 
+                  accept=".json"
+                  onChange={importData}
+                  className="hidden-file-input"
+                />
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  ReactDOM.render(<App />, document.getElementById('root'));
+</script>
+</body>
+</html>
