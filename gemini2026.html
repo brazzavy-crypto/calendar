@@ -91,6 +91,12 @@
 </head>
 <body>
 
+<div style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 15px; width: 100%;">
+    <button onclick="changeMonth(-1)" style="border:none; background:var(--gold); color:white; cursor:pointer; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">❮</button>
+    <span id="month-display" style="font-weight: bold; color: var(--gold); font-size: 1.1em; min-width: 100px; text-align: center; letter-spacing: 1px;">2026-02</span>
+    <button onclick="changeMonth(1)" style="border:none; background:var(--gold); color:white; cursor:pointer; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">❯</button>
+</div>
+
 <div id="calendar-view" class="calendar-nav"></div>
 
 <div class="container">
@@ -154,18 +160,9 @@
 <script src="data.js"></script>
 
 <script>
-    // 这里是你原本的逻辑代码（比如生成菱形、处理点击事件等）
-    // 只要上面引入了 data.js，这里的代码依然可以读取到 calendarData
-
-// 获取今天的 YYYY-MM-DD 格式
-const today = new Date();
-const todayStr = today.getFullYear() + '-' + 
-                 String(today.getMonth() + 1).padStart(2, '0') + '-' + 
-                 String(today.getDate()).padStart(2, '0');
-
-// 尝试加载今天，如果 data.js 里还没写今天，就默认显示 1月8日
-let currentShowingDate = calendarData.some(d => d.date === todayStr) ? todayStr : "2026-01-08";
-
+// --- 初始化变量 ---
+let displayedMonth = 2; // 默认进入2月
+let currentShowingDate = "2026-02-01"; // 默认选中2月1日
 let userStorage = JSON.parse(localStorage.getItem('cal_progress_2026')) || {};
 
 function init() {
@@ -173,10 +170,53 @@ function init() {
     loadDate(currentShowingDate);
 }
 
+// 月份切换函数
+function changeMonth(delta) {
+    let newMonth = displayedMonth + delta;
+    if (newMonth >= 1 && newMonth <= 12) {
+        displayedMonth = newMonth;
+        renderCalendarNav();
+    }
+}
+
+// 核心渲染函数：根据 displayedMonth 动态生成日历圆点
+function renderCalendarNav() {
+    const nav = document.getElementById('calendar-view');
+    const monthLabel = document.getElementById('month-display');
+    nav.innerHTML = '';
+    
+    const mStr = String(displayedMonth).padStart(2, '0');
+    if(monthLabel) monthLabel.innerText = `2026-${mStr}`;
+
+    // 动态获取该月天数（2026年非闰年，2月会自动返回28）
+    const daysInMonth = new Date(2026, displayedMonth, 0).getDate();
+
+    for(let i=1; i<=daysInMonth; i++) {
+        const dStr = `2026-${mStr}-${String(i).padStart(2,'0')}`;
+        const dot = document.createElement('div');
+        
+        // 样式状态：选中、有数据、已完成
+        dot.className = `cal-dot ${dStr === currentShowingDate ? 'active' : ''}`;
+        if (calendarData.some(x => x.date === dStr)) dot.classList.add('has-data');
+        if (userStorage[dStr]?.done) dot.classList.add('completed');
+        
+        dot.innerText = i;
+        dot.onclick = () => {
+            currentShowingDate = dStr;
+            loadDate(dStr);
+            renderCalendarNav(); // 刷新激活状态
+        };
+        nav.appendChild(dot);
+    }
+}
+
 function loadDate(dStr) {
-    currentShowingDate = dStr;
     const data = calendarData.find(x => x.date === dStr);
-    if(!data) return;
+    if(!data) {
+        // 如果该天没数据，显示空白提醒
+        document.getElementById('date-cn').innerText = dStr + " (暂无数据)";
+        return;
+    }
     const saved = userStorage[dStr] || {};
 
     // 基础信息渲染
@@ -202,7 +242,7 @@ function loadDate(dStr) {
     document.getElementById('write_a_q').innerText = data.write_a;
     document.getElementById('write_a_input').value = saved.write_a || '';
     
-    // --- 隐藏区扩展模块 (范文 & 鉴赏) ---
+    // 隐藏区扩展模块 (范文 & 鉴赏)
     const adultArea = document.getElementById('adult-content');
     const oldExtra = adultArea.querySelector('.extra-wrap');
     if(oldExtra) oldExtra.remove();
@@ -211,136 +251,89 @@ function loadDate(dStr) {
     extraWrap.className = 'extra-wrap';
     extraWrap.style.marginTop = "10px";
 
-    // 1. 范文功能
     if(data.write_a_sample) {
         const sampleBtn = document.createElement('button');
         sampleBtn.className = 'secondary-btn';
         sampleBtn.style = "padding: 4px 10px; font-size: 11px; border-color:var(--accent); color:var(--accent); margin-right:8px;";
         sampleBtn.innerText = "范文";
-
         const sampleContent = document.createElement('div');
         sampleContent.className = 'ans-show';
         sampleContent.style.display = 'none';
         sampleContent.innerHTML = `<div style="color:var(--accent); font-weight:bold; margin-bottom:5px;">参考范文：</div>${data.write_a_sample}`;
-
-        sampleBtn.onclick = () => {
-            sampleContent.style.display = sampleContent.style.display === 'none' ? 'block' : 'none';
-        };
+        sampleBtn.onclick = () => sampleContent.style.display = sampleContent.style.display === 'none' ? 'block' : 'none';
         extraWrap.appendChild(sampleBtn);
         extraWrap.appendChild(sampleContent);
     }
 
-    // 2. 鉴赏功能
-		if(data.daily_reading) {
+    if(data.daily_reading) {
         const readBtn = document.createElement('button');
         readBtn.className = 'secondary-btn';
         readBtn.style = "padding: 4px 10px; font-size: 11px; border-color:#966; color:#966;";
         readBtn.innerText = "鉴赏";
-
         const readContent = document.createElement('div');
         readContent.className = 'ans-show';
         readContent.style.display = 'none';
         readContent.style.borderLeft = "3px solid #966";
-        
-        // --- 修改点：在这里拼接“鉴赏正文”和“模仿挑战” ---
         let htmlBuffer = `<div style="color:#966; font-weight:bold; margin-bottom:5px;">文学片段鉴赏：</div>${data.daily_reading}`;
-        
-        // 如果数据里有模仿题，就接在后面
         if (data.mimic_task) {
-            htmlBuffer += `
-                <div style="margin-top:15px; padding:10px; border-top:1px dashed #966; background:rgba(150,102,102,0.05);">
-                    <div style="color:#966; font-weight:bold; font-size:12px; margin-bottom:4px;">✍️ 进阶感官模仿挑战：</div>
-                    <div style="color:#444; font-size:13px; line-height:1.5;">${data.mimic_task}</div>
-                </div>`;
+            htmlBuffer += `<div style="margin-top:15px; padding:10px; border-top:1px dashed #966; background:rgba(150,102,102,0.05);"><div style="color:#966; font-weight:bold; font-size:12px; margin-bottom:4px;">✍️ 模仿挑战：</div><div style="color:#444; font-size:13px;">${data.mimic_task}</div></div>`;
         }
-        
         readContent.innerHTML = htmlBuffer;
-        // ------------------------------------------
-
-        readBtn.onclick = () => {
-            readContent.style.display = readContent.style.display === 'none' ? 'block' : 'none';
-        };
+        readBtn.onclick = () => readContent.style.display = readContent.style.display === 'none' ? 'block' : 'none';
         extraWrap.appendChild(readBtn);
         extraWrap.appendChild(readContent);
     }
-
     adultArea.appendChild(extraWrap);
-
-    // 重置状态
-    document.getElementById('adult-content').style.display = 'none';
-    renderCalendarNav();
 }
 
+// 其余辅助函数保持不变
 function renderFlexibleEx(lang, rawEx, correctAns, saved) {
     const qEl = document.getElementById(lang + '_ex_q');
     const area = document.getElementById(lang + '_input_area');
     area.innerHTML = '';
-    
-    // 获取当前日期的数据对象，以便读取 tips
     const data = calendarData.find(x => x.date === currentShowingDate);
     const tips = (lang === 'jp' ? data.jp_ans_tips : data.fr_ans_tips) || "";
 
     if (rawEx.includes('A.')) {
-        const parts = rawEx.split(/[A-D]\./);
-        qEl.innerHTML = parts[0];
         const opts = rawEx.match(/[A-D]\.[^A-D]+/g) || [];
         const grid = document.createElement('div');
         grid.className = 'options-grid';
-        
-        // 创建一个用于显示选择题解析的容器
         const tipEl = document.createElement('div');
         tipEl.className = 'ans-show';
-        tipEl.style.marginTop = "10px";
+        tipEl.style.display = 'none';
 
         opts.forEach(optStr => {
             const btn = document.createElement('button');
             btn.className = 'opt-btn';
             btn.innerText = optStr.trim();
             const char = optStr.trim().charAt(0);
-            
-            if(saved[lang + '_choice']) {
-                if(char === correctAns) btn.classList.add('correct');
-                if(saved[lang + '_choice'] === char && char !== correctAns) btn.classList.add('wrong');
-                tipEl.innerHTML = `<strong>解析：</strong>${tips}`;
-                tipEl.style.display = 'block';
-            } else {
-                btn.onclick = () => {
-                    if(char === correctAns) btn.classList.add('correct');
-                    else {
-                        btn.classList.add('wrong');
-                        Array.from(grid.children).forEach(b => {
-                            if(b.innerText.trim().startsWith(correctAns)) b.classList.add('correct');
-                        });
-                    }
-                    saveCurrentData(lang + '_choice', char);
-                    tipEl.innerHTML = `<strong>解析：</strong>${tips}`;
-                    tipEl.style.display = 'block';
-                };
+            if(saved[lang + '_choice'] === char) {
+                btn.classList.add(char === correctAns ? 'correct' : 'wrong');
             }
+            btn.onclick = () => {
+                saveCurrentData(lang + '_choice', char);
+                renderFlexibleEx(lang, rawEx, correctAns, userStorage[currentShowingDate]);
+            };
             grid.appendChild(btn);
         });
         area.appendChild(grid);
-        area.appendChild(tipEl);
+        if(saved[lang + '_choice']) {
+            tipEl.innerHTML = `<strong>解析：</strong>${tips}`;
+            tipEl.style.display = 'block';
+            area.appendChild(tipEl);
+        }
     } else {
-        qEl.innerHTML = rawEx;
         const txt = document.createElement('textarea');
         txt.value = saved[lang + '_text'] || '';
         txt.oninput = (e) => saveCurrentData(lang + '_text', e.target.value);
-        
         const ansBtn = document.createElement('button');
-        ansBtn.innerText = "查看参考答案";
-        ansBtn.style = "margin-top:5px; font-size:11px; cursor:pointer;";
-        
+        ansBtn.innerText = "查看答案";
         const ansDiv = document.createElement('div');
         ansDiv.className = 'ans-show';
-        // 这里同时显示 答案 和 解析
-        ansDiv.innerHTML = `<strong>参考答案：</strong>${correctAns}<br><br><strong>解析：</strong>${tips}`;
-        
-        ansBtn.onclick = () => { ansDiv.style.display = 'block'; };
-        
-        area.appendChild(txt);
-        area.appendChild(ansBtn);
-        area.appendChild(ansDiv);
+        ansDiv.style.display = 'none';
+        ansDiv.innerHTML = `<strong>答案：</strong>${correctAns}<br><strong>解析：</strong>${tips}`;
+        ansBtn.onclick = () => ansDiv.style.display = 'block';
+        area.appendChild(txt); area.appendChild(ansBtn); area.appendChild(ansDiv);
     }
 }
 
@@ -354,64 +347,11 @@ function saveCurrentData(key, val) {
     renderCalendarNav();
 }
 
-function generateWeeklyReport() {
-    let report = "请作为我的语言教练和文学导师，对本周内容进行深度 Review：\n\n";
-    const dates = Object.keys(userStorage).sort();
-    if (dates.length === 0) { alert("暂无数据"); return; }
-    dates.forEach(d => {
-        const item = userStorage[d];
-        report += `--- 日期: ${d} ---\n`;
-        if (item.jp_text) report += `[日语]: ${item.jp_text}\n`;
-        if (item.fr_text) report += `[法语]: ${item.fr_text}\n`;
-        if (item.write_c) report += `[常规]: ${item.write_c}\n`;
-        if (item.write_a) report += `[感官]: ${item.write_a}\n\n`;
-    });
-    const copyArea = document.getElementById('copy-temp');
-    copyArea.value = report;
-    copyArea.select();
-    document.execCommand('copy');
-    alert("本周内容已成功复制！");
-}
-
-function exportData() {
-    const blob = new Blob([JSON.stringify(userStorage)], {type: "application/json"});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `calendar_backup.json`;
-    a.click();
-}
-
-function importData(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        userStorage = JSON.parse(e.target.result);
-        localStorage.setItem('cal_progress_2026', JSON.stringify(userStorage));
-        location.reload();
-    };
-    reader.readAsText(file);
-}
-
 function toggleAdult() {
     const c = document.getElementById('adult-content');
     c.style.display = (c.style.display === 'block') ? 'none' : 'block';
 }
 
-function renderCalendarNav() {
-    const nav = document.getElementById('calendar-view');
-    nav.innerHTML = '';
-    for(let i=1; i<=31; i++) {
-        const dStr = `2026-01-${String(i).padStart(2,'0')}`;
-        const dot = document.createElement('div');
-        dot.className = `cal-dot ${dStr === currentShowingDate ? 'active' : ''}`;
-        if (calendarData.find(x => x.date === dStr)) dot.classList.add('has-data');
-        if (userStorage[dStr]?.done) dot.classList.add('completed');
-        dot.innerText = i;
-        dot.onclick = () => loadDate(dStr);
-        nav.appendChild(dot);
-    }
-}
 window.onload = init;
 </script>
 </body>
