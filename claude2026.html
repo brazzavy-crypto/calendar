@@ -715,7 +715,7 @@
                 {showSamples[`${selectedDate}-creative`] && (
                   <div className="sample-content">
                     <div className="sample-title">📝 参考范文</div>
-                    {dayData.creativeSample}
+                    <div dangerouslySetInnerHTML={{__html: dayData.creativeSample.replace(/\n/g, '<br/>')}} />
                   </div>
                 )}
               </div>
