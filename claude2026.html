@@ -389,7 +389,7 @@
 
   function App() {
     const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-    const [currentMonth, setCurrentMonth] = useState(1);
+const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
     const [completedDates, setCompletedDates] = useState({});
     const [japaneseAnswer, setJapaneseAnswer] = useState(null);
     const [frenchAnswer, setFrenchAnswer] = useState(null);
@@ -646,17 +646,28 @@
             <div className="section">
               <div className="section-title">🇯🇵 日语习题 (N3)</div>
               <div className="exercise-box">
-                <div className="exercise-question">{dayData.japanese.question}</div>
+                <div className="exercise-question">
+  {dayData.japanese.question}
+  {dayData.japanese.translation && (
+    <div style={{fontSize: '0.9rem', color: '#6b7280', marginTop: '0.5rem'}}>
+      {dayData.japanese.translation}
+    </div>
+  )}
+</div>
                 <div className="options">
                   {dayData.japanese.options.map((opt, idx) => (
                     <button
-                      key={idx}
-                      className={`option-btn ${japaneseAnswer === idx ? (idx === dayData.japanese.correct ? 'correct' : 'wrong') : ''}`}
-                      onClick={() => handleJapaneseAnswer(idx)}
-                      disabled={japaneseAnswer !== null}
-                    >
-                      {opt}
-                    </button>
+  key={idx}
+  className={`option-btn ${
+    japaneseAnswer !== null 
+      ? (idx === dayData.japanese.correct ? 'correct' : (japaneseAnswer === idx ? 'wrong' : ''))
+      : ''
+  }`}
+  onClick={() => handleJapaneseAnswer(idx)}
+  disabled={japaneseAnswer !== null}
+>
+  {opt}
+</button>
                   ))}
                 </div>
                 {japaneseAnswer !== null && (
@@ -671,17 +682,28 @@
             <div className="section">
               <div className="section-title">🇫🇷 法语习题 (B1)</div>
               <div className="exercise-box french">
-                <div className="exercise-question">{dayData.french.question}</div>
+                <div className="exercise-question">
+  {dayData.french.question}
+  {dayData.french.translation && (
+    <div style={{fontSize: '0.9rem', color: '#6b7280', marginTop: '0.5rem'}}>
+      {dayData.french.translation}
+    </div>
+  )}
+</div>
                 <div className="options">
                   {dayData.french.options.map((opt, idx) => (
-                    <button
-                      key={idx}
-                      className={`option-btn ${frenchAnswer === idx ? (idx === dayData.french.correct ? 'correct' : 'wrong') : ''}`}
-                      onClick={() => handleFrenchAnswer(idx)}
-                      disabled={frenchAnswer !== null}
-                    >
-                      {opt}
-                    </button>
+<button
+  key={idx}
+  className={`option-btn ${
+    frenchAnswer !== null 
+      ? (idx === dayData.french.correct ? 'correct' : (frenchAnswer === idx ? 'wrong' : ''))
+      : ''
+  }`}
+  onClick={() => handleFrenchAnswer(idx)}
+  disabled={frenchAnswer !== null}
+>
+  {opt}
+</button>
                   ))}
                 </div>
                 {frenchAnswer !== null && (
