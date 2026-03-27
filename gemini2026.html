@@ -139,13 +139,29 @@
         <textarea id="write_c_input" oninput="saveCurrentData()" placeholder="开始写作..."></textarea>
     </div>
 
-    <div class="secret-trigger" onclick="toggleAdult()">♢</div>
-    <div class="hidden-content" id="adult-content">
-        <div class="exercise-container" style="border-top: 1px solid var(--accent);">
-            <p id="write_a_q" style="font-size:0.9em; margin-bottom:5px; font-weight:bold; color:var(--accent);"></p>
-            <textarea id="write_a_input" oninput="saveCurrentData()" placeholder="私密写作..."></textarea>
-        </div>
+<div style="display: flex; gap: 40px; justify-content: center; margin-top: 25px;">
+    <div class="secret-trigger" onclick="togglePanel('write')" 
+         style="color:#eee; font-size:18px; cursor:pointer; user-select:none; transition: color 0.3s;" 
+         onmouseover="this.style.color='#999'" 
+         onmouseout="this.style.color='#eee'"
+         title="创作">♢</div>
+    <div class="secret-trigger" onclick="togglePanel('read')" 
+         style="color:#eee; font-size:18px; cursor:pointer; user-select:none; transition: color 0.3s;" 
+         onmouseover="this.style.color='#999'" 
+         onmouseout="this.style.color='#eee'"
+         title="鉴赏">☆</div>
+</div>
+
+<div class="hidden-content" id="adult-content" style="display:none; background:#fff; border:1px solid #ddd; border-radius:8px; padding:15px; margin-top:10px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+    <div class="exercise-container">
+        <p id="write_a_q" style="font-size:0.95em; margin-bottom:10px; font-weight:bold; color:#333;"></p>
+        <textarea id="write_a_input" oninput="saveCurrentData()" 
+                  placeholder="在此输入创作内容..." 
+                  style="width:100%; height:120px; padding:12px; border:1px solid #ccc; border-radius:4px; box-sizing:border-box; color:#000; font-size:14px; background:#fff; line-height:1.6;"></textarea>
     </div>
+</div>
+
+<div class="hidden-content" id="reading-content" style="display:none; background:#fff; border:1px solid #ddd; border-radius:8px; padding:15px; margin-top:10px; box-shadow:0 2px 10px rgba(0,0,0,0.05);"></div>
 
 <div class="admin-btns">
     <button class="report-btn" onclick="generateWeeklyReport()">📊 本周评审</button>
@@ -253,48 +269,61 @@ function loadDate(dStr) {
     document.getElementById('write_a_q').innerText = data.write_a;
     document.getElementById('write_a_input').value = saved.write_a || '';
     
-    // 隐藏区扩展模块 (范文 & 鉴赏)
-    const adultArea = document.getElementById('adult-content');
-    const oldExtra = adultArea.querySelector('.extra-wrap');
+// --- 内部内容：使用正常深色渲染 ---
+    const writePanel = document.getElementById('adult-content');
+    const readPanel = document.getElementById('reading-content');
+    
+    const oldExtra = writePanel.querySelector('.extra-wrap');
     if(oldExtra) oldExtra.remove();
+    readPanel.innerHTML = ''; 
 
-    const extraWrap = document.createElement('div');
-    extraWrap.className = 'extra-wrap';
-    extraWrap.style.marginTop = "10px";
-
+    // A. 创作面板：范文部分使用深色
     if(data.write_a_sample) {
+        const extraWrap = document.createElement('div');
+        extraWrap.className = 'extra-wrap';
         const sampleBtn = document.createElement('button');
-        sampleBtn.className = 'secondary-btn';
-        sampleBtn.style = "padding: 4px 10px; font-size: 11px; border-color:var(--accent); color:var(--accent); margin-right:8px;";
-        sampleBtn.innerText = "范文";
+        // 按钮本身可以低调，但文字要可见
+        sampleBtn.style = "width:100%; margin-top:10px; border:1px solid #ccc; color:#666; background:#f9f9f9; font-size:12px; cursor:pointer; padding:5px; border-radius:4px;";
+        sampleBtn.innerText = "查看参考范文"; 
+        
         const sampleContent = document.createElement('div');
         sampleContent.className = 'ans-show';
-        sampleContent.style.display = 'none';
-        sampleContent.innerHTML = `<div style="color:var(--accent); font-weight:bold; margin-bottom:5px;">参考范文：</div>${data.write_a_sample}`;
+        // 范文正文使用深灰色 (#333)，左侧加深色边框
+        sampleContent.style = "display:none; color:#333; font-size:14px; border-left:3px solid #603; padding-left:12px; margin-top:12px; line-height:1.7; background:#fffafc;";
+        sampleContent.innerHTML = `<div style="font-weight:bold; margin-bottom:5px; color:#603;">范文展示：</div>${data.write_a_sample}`;
+        
         sampleBtn.onclick = () => sampleContent.style.display = sampleContent.style.display === 'none' ? 'block' : 'none';
         extraWrap.appendChild(sampleBtn);
         extraWrap.appendChild(sampleContent);
+        writePanel.appendChild(extraWrap);
     }
 
+    // B. 鉴赏面板：鉴赏文字使用清晰深色
     if(data.daily_reading) {
-        const readBtn = document.createElement('button');
-        readBtn.className = 'secondary-btn';
-        readBtn.style = "padding: 4px 10px; font-size: 11px; border-color:#966; color:#966;";
-        readBtn.innerText = "鉴赏";
-        const readContent = document.createElement('div');
-        readContent.className = 'ans-show';
-        readContent.style.display = 'none';
-        readContent.style.borderLeft = "3px solid #966";
-        let htmlBuffer = `<div style="color:#966; font-weight:bold; margin-bottom:5px;">文学片段鉴赏：</div>${data.daily_reading}`;
-        if (data.mimic_task) {
-            htmlBuffer += `<div style="margin-top:15px; padding:10px; border-top:1px dashed #966; background:rgba(150,102,102,0.05);"><div style="color:#966; font-weight:bold; font-size:12px; margin-bottom:4px;">✍️ 模仿挑战：</div><div style="color:#444; font-size:13px;">${data.mimic_task}</div></div>`;
-        }
-        readContent.innerHTML = htmlBuffer;
-        readBtn.onclick = () => readContent.style.display = readContent.style.display === 'none' ? 'block' : 'none';
-        extraWrap.appendChild(readBtn);
-        extraWrap.appendChild(readContent);
+        const readInner = document.createElement('div');
+        readInner.className = 'exercise-container';
+        readInner.innerHTML = `
+            <div style="color:#966; font-weight:bold; font-size:15px; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px;">📖 文学鉴赏</div>
+            <div style="font-size:14px; color:#222; line-height:1.8; margin-bottom:15px; text-align:justify;">${data.daily_reading}</div>
+            
+            <button id="mimic-btn" 
+                    style="width:100%; border:1px solid #966; color:#966; background:#fff; font-size:12px; cursor:pointer; padding:6px; border-radius:4px;">开始模仿挑战</button>
+            
+            <div id="mimic-area" style="display:none; margin-top:15px; border-top:1px dashed #ccc; padding-top:15px;">
+                <div style="font-size:13px; color:#444; margin-bottom:8px; background:#f5f5f5; padding:8px; border-radius:4px;">
+                    <strong>🎯 挑战任务：</strong>${data.mimic_task || '模仿上述风格进行练习。'}
+                </div>
+                <textarea id="mimic_input" oninput="saveMimicData()" 
+                          placeholder="在此输入你的练习..." 
+                          style="border:1px solid #ccc; background:#fff; color:#000; height:120px; width:100%; box-sizing:border-box; padding:10px; font-size:14px; line-height:1.6;">${saved.mimic_write || ''}</textarea>
+            </div>
+        `;
+        readInner.querySelector('#mimic-btn').onclick = () => {
+            const area = readInner.querySelector('#mimic-area');
+            area.style.display = area.style.display === 'none' ? 'block' : 'none';
+        };
+        readPanel.appendChild(readInner);
     }
-    adultArea.appendChild(extraWrap);
 }
 
 // 其余辅助函数保持不变
@@ -376,9 +405,52 @@ function saveCurrentData(key, val) {
     renderCalendarNav();
 }
 
-function toggleAdult() {
-    const c = document.getElementById('adult-content');
-    c.style.display = (c.style.display === 'block') ? 'none' : 'block';
+// 替换原本的 exportData 函数
+function exportData() {
+    const dataStr = JSON.stringify(userStorage, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    // 文件名包含日期，方便你以后在手机里找
+    a.download = `language_backup_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    
+    // 清理工作
+    setTimeout(() => {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }, 0);
+    
+    alert("备份文件已生成！\n电脑：请查看浏览器下载记录\n手机：请查看系统“下载(Download)”文件夹");
+}
+
+// 切换主面板：创作 (write) 或 鉴赏 (read)
+function togglePanel(type) {
+    const writePanel = document.getElementById('adult-content');
+    const readPanel = document.getElementById('reading-content');
+    
+    if (type === 'write') {
+        // 开启创作，关闭鉴赏
+        writePanel.style.display = (writePanel.style.display === 'block') ? 'none' : 'block';
+        readPanel.style.display = 'none';
+    } else {
+        // 开启鉴赏，关闭创作
+        readPanel.style.display = (readPanel.style.display === 'block') ? 'none' : 'block';
+        writePanel.style.display = 'none';
+    }
+}
+
+// 专门用于保存模仿挑战的内容
+function saveMimicData() {
+    const val = document.getElementById('mimic_input').value;
+    if(!userStorage[currentShowingDate]) userStorage[currentShowingDate] = {};
+    userStorage[currentShowingDate].mimic_write = val;
+    userStorage[currentShowingDate].done = true;
+    localStorage.setItem('cal_progress_2026', JSON.stringify(userStorage));
+    renderCalendarNav();
 }
 
 window.onload = init;
