@@ -767,7 +767,7 @@ const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
                   {showSamples[`${selectedDate}-erotica`] && (
                     <div className="sample-content">
                       <div className="sample-title">📝 参考范文</div>
-                      {dayData.eroticaSample}
+                      <div dangerouslySetInnerHTML={{__html: dayData.eroticaSample.replace(/\n/g, '<br/>')}} />
                     </div>
                   )}
                 </div>
