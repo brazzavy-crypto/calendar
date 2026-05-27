@@ -121,7 +121,7 @@
         </div>
     </div>
 
-    <div id="exercises-area">
+<div id="exercises-area">
         <div class="section-title">语言进阶练习</div>
         <div class="exercise-container">
             <p><strong>日本語:</strong> <span id="jp_ex_q"></span></p>
@@ -130,6 +130,10 @@
         <div class="exercise-container">
             <p><strong>Français:</strong> <span id="fr_ex_q"></span></p>
             <div id="fr_input_area"></div>
+        </div>
+        <div class="exercise-container">
+            <p><strong>Español:</strong> <span id="es_ex_q"></span></p>
+            <div id="es_input_area"></div>
         </div>
     </div>
 
@@ -262,6 +266,7 @@ function loadDate(dStr) {
     // 习题渲染
     renderFlexibleEx('jp', data.jp_ex, data.jp_ans, saved);
     renderFlexibleEx('fr', data.fr_ex, data.fr_ans, saved);
+    renderFlexibleEx('es', data.es_ex, data.es_ans, saved); // 新增西语调用
 
     // 写作区渲染
     document.getElementById('write_c_q').innerText = data.write_c;
@@ -334,7 +339,8 @@ function renderFlexibleEx(lang, rawEx, correctAns, saved) {
     area.innerHTML = '';
     
     const data = calendarData.find(x => x.date === currentShowingDate);
-    const tips = (lang === 'jp' ? data.jp_ans_tips : data.fr_ans_tips) || "";
+// 动态动态获取对应语言的解析提示（Tips）
+    const tips = (lang === 'jp' ? data.jp_ans_tips : (lang === 'fr' ? data.fr_ans_tips : data.es_ans_tips)) || "";
 
     // 判断是否为选择题（包含 A. B. C. D. 结构）
     if (rawEx.includes('A.')) {
