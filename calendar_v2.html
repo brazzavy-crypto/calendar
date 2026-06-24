@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026语言学习日历</title>
+  <style>
+    :root {
+      --orange-dark: #d97e36;
+      --orange-main: #f39c42;
+      --orange-light: #f5ead4;
+      --jp-bg: #fde8c4;
+      --fr-bg: #f5d89a;
+      --other-bg: #f1e8d4;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: linear-gradient(135deg, var(--orange-light) 0%, #fff 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 8px 24px rgba(243, 156, 66, 0.15);
+    }
+    
+    h1 {
+      text-align: center;
+      color: var(--orange-dark);
+      margin-bottom: 30px;
+      font-size: 28px;
+    }
+    
+    /* ===== 迷你日历部分 ===== */
+    .calendar-wrapper {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 20px;
+      background: var(--orange-light);
+      border-radius: 10px;
+    }
+    
+    .mini-calendar {
+      display: inline-block;
+      margin: 0 10px;
+      width: 200px;
+    }
+    
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-weight: bold;
+      color: var(--orange-dark);
+      font-size: 14px;
+    }
+    
+    .calendar-header button {
+      background: var(--orange-main);
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    
+    .calendar-header button:hover { background: var(--orange-dark); }
+    
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+      font-size: 11px;
+    }
+    
+    .day-name {
+      font-weight: bold;
+      color: #999;
+      padding: 4px;
+    }
+    
+    .day-cell {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      cursor: pointer;
+      background: white;
+      font-size: 10px;
+      transition: all 0.2s;
+    }
+    
+    .day-cell:hover { border-color: var(--orange-main); }
+    .day-cell.today { background: var(--orange-main); color: white; border-color: var(--orange-main); }
+    .day-cell.completed { background: var(--orange-main); color: white; position: relative; }
+    .day-cell.completed::after { content: "✓"; font-weight: bold; font-size: 8px; }
+    .day-cell.future-with-data { background: white; border: 1px solid #ccc; cursor: not-allowed; }
+    .day-cell.future-no-data { background: #e8e8e8; color: #999; cursor: not-allowed; border: 1px solid #d0d0d0; }
+    .day-cell.other-month { color: #ddd; }
+    
+    /* ===== 日期显示部分 ===== */
+    .date-section {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      border-left: 4px solid var(--orange-main);
+    }
+    
+    .date-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .date-item {
+      padding: 12px;
+      border-radius: 6px;
+      line-height: 1.6;
+    }
+    
+    .date-item.other { background: var(--other-bg); }
+    .date-item.jp { background: var(--jp-bg); }
+    .date-item.fr { background: var(--fr-bg); }
+    
+    .date-label { font-weight: bold; color: var(--orange-dark); font-size: 11px; text-transform: uppercase; }
+    .date-value { font-size: 15px; margin-top: 6px; font-weight: 500; }
+    .date-value.jp { 
+      font-size: 16px; 
+      font-family: 'Hiragino Kaku Gothic', 'Yu Gothic', sans-serif; 
+      letter-spacing: 2px;
+      text-align: center;
+    }
+    
+    .lunar-info {
+      background: white;
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 12px;
+    }
+    
+    .lunar-item {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    
+    /* ===== 语言块样式 ===== */
+    .language-block {
+      margin-bottom: 25px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .lang-header {
+      padding: 12px 16px;
+      font-weight: bold;
+      color: white;
+      font-size: 14px;
+    }
+    
+    .lang-header.other { background: var(--orange-main); }
+    .lang-header.jp { background: var(--orange-main); }
+    .lang-header.fr { background: var(--orange-main); }
+    
+    .lang-content {
+      padding: 16px;
+      background: white;
+      border: 1px solid #f0f0f0;
+    }
+    
+    /* ===== 名人名言部分 ===== */
+    .quote-section {
+      background: white;
+    }
+    
+    .quote-text {
+      font-style: italic;
+      color: #555;
+      margin-bottom: 8px;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+    
+    .quote-source {
+      color: #999;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+    
+    .quote-translation {
+      color: var(--orange-dark);
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    /* ===== 习题部分 ===== */
+    .exercise-section {
+      background: white;
+    }
+    
+    .question {
+      color: #333;
+      line-height: 1.8;
+      margin-bottom: 15px;
+      font-size: 15px;
+    }
+    
+    .exercise-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .option {
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+      text-align: left;
+      font-size: 14px;
+    }
+    
+    .option:hover { border-color: var(--orange-main); background: #fafafa; }
+    .option.correct { background: #d4edda; border-color: #28a745; color: #155724; }
+    .option.incorrect { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+    
+    .submit-btn {
+      background: var(--orange-main);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    
+    .submit-btn:hover { background: var(--orange-dark); }
+    
+    .feedback {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 6px;
+      display: none;
+    }
+    
+    .feedback.show { display: block; }
+    .feedback.correct { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .feedback.incorrect { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    
+    .feedback-title { font-weight: bold; margin-bottom: 8px; }
+    .feedback-explanation { font-size: 13px; color: inherit; font-style: italic; }
+    
+    /* ===== 写作部分 ===== */
+    .writing-section {
+      background: white;
+    }
+    
+    .writing-prompt {
+      color: #333;
+      line-height: 1.8;
+      margin-bottom: 15px;
+      font-size: 15px;
+    }
+    
+    .writing-container {
+      margin-bottom: 15px;
+    }
+    
+    .writing-textarea {
+      width: 100%;
+      min-height: 150px;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+    }
+    
+    .writing-textarea:focus {
+      outline: none;
+      border-color: var(--orange-main);
+    }
+    
+    .character-count {
+      text-align: right;
+      color: #999;
+      font-size: 12px;
+      margin-top: 5px;
+    }
+    
+    .btn-primary {
+      background: var(--orange-main);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
+    .btn-primary:hover { background: var(--orange-dark); }
+    
+    .sample-text {
+      margin-top: 15px;
+      padding: 12px;
+      background: var(--orange-light);
+      border-radius: 6px;
+      line-height: 1.8;
+      font-size: 14px;
+      display: none;
+    }
+    
+    .sample-text.show { display: block; }
+    
+    /* ===== 隐藏的情色写作 ===== */
+    .erotica-toggle {
+      width: 20px;
+      height: 20px;
+      background: transparent;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-block;
+      margin: 0 10px;
+      visibility: hidden;  /* 完全不可见但仍占据空间 */
+    }
+    
+    .erotica-toggle:hover {
+      border-color: transparent;
+      background: transparent;
+    }
+    
+    .erotica-content {
+      display: none;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+    
+    .erotica-content.show { display: block; }
+    
+    /* ===== 底部功能 ===== */
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 2px solid var(--orange-light);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .footer-buttons {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .icon-btn {
+      background: var(--orange-main);
+      color: white;
+      border: none;
+      width: 44px;
+      height: 44px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    
+    .icon-btn:hover { background: var(--orange-dark); }
+    
+    #fileInput { display: none; }
+    
+    /* ===== 响应式 ===== */
+    @media (max-width: 768px) {
+      .container { padding: 15px; }
+      .mini-calendar { width: 160px; }
+      .date-grid { grid-template-columns: 1fr; gap: 10px; }
+      .exercise-options { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>2026 语言学习日历</h1>
+    
+    <!-- 迷你日历 -->
+    <div class="calendar-wrapper">
+      <div id="miniCalendar"></div>
+    </div>
+    
+    <!-- 主要内容 -->
+    <div id="mainContent"></div>
+    
+    <!-- 导入导出 -->
+    <div class="footer">
+      <div class="footer-buttons">
+        <button class="icon-btn" onclick="exportData()" title="导出数据">📥</button>
+        <button class="icon-btn" onclick="document.getElementById('fileInput').click()" title="导入数据">📤</button>
+        <input type="file" id="fileInput" accept=".json" onchange="importData(event)">
+        <button class="icon-btn" id="eroticaBtn" onclick="toggleErotica()" title="隐藏内容" style="background: transparent; border: none; opacity: 0; pointer-events: auto;"></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="data2026.js"></script>
+  
+  <script>
+    // ===== 全局变量 =====
+    let currentMonth = 1;
+    let currentDate = null;
+    let showErotica = false;
+    
+    const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+    const jpWeekDays = ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'];
+    const frWeekDays = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+    const chWeekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+    
+    // 日语数字和月份（平假名）
+    const jpDayNames = ['', 'ついたち', 'ふつか', 'みっか', 'よっか', 'いつか', 'むいか', 'ななか', 'ようか', 'ここのか', 'とおか',
+      'じゅういちにち', 'じゅうににち', 'じゅうさんにち', 'じゅうよんにち', 'じゅうごにち', 'じゅうろくにち', 'じゅうしちにち', 'じゅうはちにち', 'じゅうきゅうにち', 'はつか',
+      'にじゅういちにち', 'にじゅうににち', 'にじゅうさんにち', 'にじゅうよんにち', 'にじゅうごにち', 'にじゅうろくにち', 'にじゅうしちにち', 'にじゅうはちにち', 'にじゅうきゅうにち', 'さんじゅうにち', 'さんじゅういちにち'];
+    
+    const jpMonthNames = ['', 'しょうがつ', 'にがつ', 'さんがつ', 'しがつ', 'ごがつ', 'ろくがつ', 'しちがつ', 'はちがつ', 'くがつ', 'じゅうがつ', 'じゅういちがつ', 'じゅうにがつ'];
+    
+    const frMonths = ['', 'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+    
+    // 打卡和习题记录
+    let completionRecord = JSON.parse(localStorage.getItem('completionRecord') || '{}');
+    let exerciseAnswers = JSON.parse(localStorage.getItem('exerciseAnswers') || '{}');
+    let writingContent = JSON.parse(localStorage.getItem('writingContent') || '{}');
+    
+    // ===== 工具函数 =====
+    function getDaysInMonth(month) {
+      const days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      return days[month - 1];
+    }
+    
+    function getFirstDayOfMonth(month) {
+      return new Date(2026, month - 1, 1).getDay();
+    }
+    
+    function isDateInFuture(dateStr) {
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const date = new Date(2026, month - 1, day);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return date > today;
+    }
+    
+    function hasDataForDate(dateStr) {
+      return data2026 && data2026[dateStr];
+    }
+    
+    function isCompleted(dateStr) {
+      return completionRecord[dateStr] === true;
+    }
+    
+    // ===== 日期格式化 =====
+    function formatDateCN(dateStr) {
+      const [year, month, day] = dateStr.split('-').map(Number);
+      return `${month}月${day}日`;
+    }
+    
+    function formatDateJP(dateStr) {
+      const [year, month, day] = dateStr.split('-').map(Number);
+      return `${jpMonthNames[month]}${jpDayNames[day]}`;
+    }
+    
+    function formatDateFR(dateStr) {
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const numberWords = ['', 'premier', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf', 'dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize', 'dix-sept', 'dix-huit', 'dix-neuf', 'vingt', 'vingt-et-un', 'vingt-deux', 'vingt-trois', 'vingt-quatre', 'vingt-cinq', 'vingt-six', 'vingt-sept', 'vingt-huit', 'vingt-neuf', 'trente', 'trente-et-un'];
+      return `${numberWords[day]} ${frMonths[month]}`;
+    }
+    
+    // ===== 迷你日历渲染 =====
+    function renderMiniCalendar() {
+      let html = '';
+      
+      for (let month of [currentMonth - 1, currentMonth, currentMonth + 1]) {
+        if (month < 1 || month > 12) continue;
+        
+        const firstDay = getFirstDayOfMonth(month);
+        const daysInMonth = getDaysInMonth(month);
+        const isCurrentMonth = month === currentMonth;
+        
+        html += '<div class="mini-calendar">';
+        html += '<div class="calendar-header">';
+        if (isCurrentMonth) {
+          html += '<button onclick="changeMonth(-1)">←</button>';
+        }
+        html += `<span>${monthNames[month - 1]}</span>`;
+        if (isCurrentMonth) {
+          html += '<button onclick="changeMonth(1)">→</button>';
+        }
+        html += '</div>';
+        
+        html += '<div class="days-grid">';
+        
+        // 星期头
+        ['日', '一', '二', '三', '四', '五', '六'].forEach(day => {
+          html += `<div class="day-name">${day}</div>`;
+        });
+        
+        // 前面的空白
+        for (let i = 0; i < firstDay; i++) {
+          html += '<div class="day-cell other-month"></div>';
+        }
+        
+        // 日期
+        for (let day = 1; day <= daysInMonth; day++) {
+          const dateStr = `2026-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          const hasData = hasDataForDate(dateStr);
+          const completed = isCompleted(dateStr);
+          const isFuture = isDateInFuture(dateStr);
+          const isToday = new Date().toISOString().split('T')[0] === dateStr;
+          
+          let classes = 'day-cell';
+          if (isToday && currentMonth === month) classes += ' today';
+          if (completed) classes += ' completed';
+          if (isFuture) {
+            if (hasData) {
+              classes += ' future-with-data';
+            } else {
+              classes += ' future-no-data';
+            }
+          }
+          
+          html += `<div class="${classes}" onclick="selectDate('${dateStr}')">${day}</div>`;
+        }
+        
+        html += '</div>';
+        html += '</div>';
+      }
+      
+      document.getElementById('miniCalendar').innerHTML = html;
+    }
+    
+    function changeMonth(offset) {
+      currentMonth += offset;
+      if (currentMonth < 1) currentMonth = 1;
+      if (currentMonth > 12) currentMonth = 12;
+      renderMiniCalendar();
+    }
+    
+    function selectDate(dateStr) {
+      const isFuture = isDateInFuture(dateStr);
+      if (isFuture) {
+        alert('未来日期无法查看');
+        return;
+      }
+      
+      const hasData = hasDataForDate(dateStr);
+      if (!hasData) {
+        alert('该日期暂无数据');
+        return;
+      }
+      
+      currentDate = dateStr;
+      const date = new Date(dateStr);
+      currentMonth = date.getMonth() + 1;
+      renderMiniCalendar();
+      renderMainContent();
+      showErotica = false;
+      updateEroticaBtn();
+    }
+    
+    // ===== 主要内容渲染 =====
+    function renderMainContent() {
+      if (!currentDate || !data2026[currentDate]) {
+        document.getElementById('mainContent').innerHTML = '<p style="text-align:center;color:#999;">请选择一个日期</p>';
+        return;
+      }
+      
+      const data = data2026[currentDate];
+      const [year, month, day] = currentDate.split('-').map(Number);
+      
+      let html = '';
+      
+      // 日期部分（三列布局）
+      html += '<div class="date-section">';
+      html += '<div class="date-grid">';
+      
+      html += '<div class="date-item other">';
+      html += '<div class="date-label">汉语</div>';
+      html += `<div class="date-value">${formatDateCN(currentDate)}</div>`;
+      html += '</div>';
+      
+      html += '<div class="date-item jp">';
+      html += '<div class="date-label">日本語</div>';
+      html += `<div class="date-value jp">${formatDateJP(currentDate)}</div>`;
+      html += '</div>';
+      
+      html += '<div class="date-item fr">';
+      html += '<div class="date-label">Français</div>';
+      html += `<div class="date-value">${formatDateFR(currentDate)}</div>`;
+      html += '</div>';
+      
+      html += '</div>';
+      
+      // 星期显示
+      const dayOfWeek = new Date(2026, month - 1, day).getDay();
+      html += '<div class="date-grid">';
+      
+      html += '<div class="date-item other">';
+      html += '<div class="date-label">星期</div>';
+      html += `<div class="date-value">${chWeekDays[dayOfWeek]}</div>`;
+      html += '</div>';
+      
+      html += '<div class="date-item jp">';
+      html += '<div class="date-label">曜日</div>';
+      html += `<div class="date-value jp">${jpWeekDays[dayOfWeek]}</div>`;
+      html += '</div>';
+      
+      html += '<div class="date-item fr">';
+      html += '<div class="date-label">Jour</div>';
+      html += `<div class="date-value">${frWeekDays[dayOfWeek]}</div>`;
+      html += '</div>';
+      
+      html += '</div>';
+      
+      // 农历和节气
+      html += '<div class="lunar-info">';
+      if (data.date.lunar) {
+        html += `<div class="lunar-item"><strong>农历:</strong> ${data.date.lunar}`;
+        if (data.date.solarTerm) {
+          html += ` · ${data.date.solarTerm}`;
+        }
+        html += '</div>';
+      }
+      if (data.date.holiday) {
+        html += `<div class="lunar-item"><strong>节假日:</strong> <span style="color:#dc3545;">${data.date.holiday}</span></div>`;
+      }
+      html += '</div>';
+      
+      html += '</div>';
+      
+      // 名人名言部分
+      if (data.quotes) {
+        // 英语
+        if (data.quotes.english) {
+          html += renderQuoteBlock('English', 'other', data.quotes.english);
+        }
+        
+        // 日语
+        if (data.quotes.japanese) {
+          html += renderQuoteBlock('日本語', 'jp', data.quotes.japanese);
+        }
+        
+        // 法语
+        if (data.quotes.french) {
+          html += renderQuoteBlock('Français', 'fr', data.quotes.french);
+        }
+      }
+      
+      // 习题部分 - 西语、日语、法语的顺序
+      const exerciseOrder = [
+        { lang: 'spanish', label: '西语习题' },
+        { lang: 'japanese', label: '日语习题' },
+        { lang: 'french', label: '法语习题' }
+      ];
+      
+      for (const ex of exerciseOrder) {
+        if (data[ex.lang]) {
+          html += renderExercise(currentDate, ex.lang, ex.label, data[ex.lang]);
+        }
+      }
+      
+      // 创意写作部分
+      if (data.creative) {
+        html += renderWritingSection(currentDate, 'creative', '创意写作', data.creative, data.creativeSample);
+      }
+      
+      // 隐藏的情色写作
+      if (data.erotica) {
+        html += `<div id="eroticaContainer" style="display:${showErotica ? 'block' : 'none'};">`;
+        html += renderWritingSection(currentDate, 'erotica', '情色写作', data.erotica, data.eroticaSample);
+        html += '</div>';
+      }
+      
+      document.getElementById('mainContent').innerHTML = html;
+      loadWritingContent();
+    }
+    
+    function renderQuoteBlock(label, langCode, quoteData) {
+      return `<div class="language-block">
+        <div class="lang-header ${langCode}">${label}</div>
+        <div class="lang-content quote-section">
+          <div class="quote-text">"${quoteData.text}"</div>
+          <div class="quote-source">— ${quoteData.source}</div>
+          <div class="quote-translation">${quoteData.translation}</div>
+        </div>
+      </div>`;
+    }
+    
+    function renderExercise(dateStr, exerciseType, label, exerciseData) {
+      const recordKey = `${dateStr}-${exerciseType}`;
+      const answered = exerciseAnswers[recordKey];
+      
+      let html = `<div class="language-block">
+        <div class="lang-header">${label}</div>
+        <div class="lang-content exercise-section">
+          <div class="question">${exerciseData.question}</div>`;
+      
+      html += '<div class="exercise-options">';
+      if (exerciseData.options) {
+        exerciseData.options.forEach((option, idx) => {
+          let classes = 'option';
+          if (answered !== undefined) {
+            if (idx === exerciseData.correct) classes += ' correct';
+            else if (idx === answered) classes += ' incorrect';
+          }
+          html += `<div class="${classes}" onclick="answerChoice('${recordKey}', ${idx})">${String.fromCharCode(65 + idx)}. ${option}</div>`;
+        });
+      }
+      html += '</div>';
+      
+      // 反馈
+      if (answered !== undefined) {
+        const isCorrect = answered === exerciseData.correct;
+        html += `<div class="feedback show ${isCorrect ? 'correct' : 'incorrect'}">
+          <div class="feedback-title">${isCorrect ? '✓ 正确' : '✗ 错误'}</div>
+          <div class="feedback-explanation">${exerciseData.explanation}</div>
+        </div>`;
+        
+        checkCompletion(dateStr);
+      } else {
+        html += '<button class="submit-btn" onclick="markExerciseAnswered(\'' + recordKey + '\')">检查答案</button>';
+      }
+      
+      html += '</div></div>';
+      return html;
+    }
+    
+    function renderWritingSection(dateStr, type, label, prompt, sample) {
+      const contentKey = `${dateStr}-${type}`;
+      const content = writingContent[contentKey] || '';
+      
+      return `<div class="language-block">
+        <div class="lang-header">${label}</div>
+        <div class="lang-content writing-section">
+          <div class="writing-prompt">${prompt}</div>
+          <div class="writing-container">
+            <textarea 
+              class="writing-textarea" 
+              id="${contentKey}"
+              placeholder="开始写作..." 
+              oninput="saveWritingContent('${contentKey}')">${content}</textarea>
+            <div class="character-count"><span id="count-${contentKey}">${content.length}</span>/300</div>
+          </div>
+          <div>
+            <button class="btn-primary" onclick="toggleSample('sample-${contentKey}')">范文</button>
+          </div>
+          <div class="sample-text" id="sample-${contentKey}">${sample}</div>
+        </div>
+      </div>`;
+    }
+    
+    // ===== 交互函数 =====
+    function answerChoice(recordKey, answerIdx) {
+      exerciseAnswers[recordKey] = answerIdx;
+      localStorage.setItem('exerciseAnswers', JSON.stringify(exerciseAnswers));
+      renderMainContent();
+    }
+    
+    function markExerciseAnswered(recordKey) {
+      // 仅用于标记已查看，具体答案由点击选项时记录
+    }
+    
+    function saveWritingContent(contentKey) {
+      const textarea = document.getElementById(contentKey);
+      if (textarea) {
+        writingContent[contentKey] = textarea.value;
+        localStorage.setItem('writingContent', JSON.stringify(writingContent));
+        
+        const countEl = document.getElementById(`count-${contentKey}`);
+        if (countEl) countEl.textContent = textarea.value.length;
+      }
+    }
+    
+    function loadWritingContent() {
+      Object.keys(writingContent).forEach(key => {
+        const textarea = document.getElementById(key);
+        if (textarea) {
+          textarea.value = writingContent[key];
+          const countEl = document.getElementById(`count-${key}`);
+          if (countEl) countEl.textContent = textarea.value.length;
+        }
+      });
+    }
+    
+    function toggleSample(sampleId) {
+      const sample = document.getElementById(sampleId);
+      if (sample) sample.classList.toggle('show');
+    }
+    
+    function toggleErotica() {
+      if (!currentDate || !data2026[currentDate] || !data2026[currentDate].erotica) return;
+      showErotica = !showErotica;
+      const container = document.getElementById('eroticaContainer');
+      if (container) {
+        container.style.display = showErotica ? 'block' : 'none';
+      }
+      updateEroticaBtn();
+    }
+    
+    function updateEroticaBtn() {
+      const btn = document.getElementById('eroticaBtn');
+      if (btn) {
+        btn.style.background = showErotica ? 'var(--orange-main)' : '#ccc';
+      }
+    }
+    
+    function checkCompletion(dateStr) {
+      const data = data2026[dateStr];
+      if (!data) return;
+      
+      const hasJP = exerciseAnswers[`${dateStr}-japanese`] !== undefined;
+      const hasFR = exerciseAnswers[`${dateStr}-french`] !== undefined;
+      const hasSP = exerciseAnswers[`${dateStr}-spanish`] !== undefined;
+      const hasCreative = writingContent[`${dateStr}-creative`];
+      
+      const allDone = hasJP && hasFR && hasSP && hasCreative;
+      if (allDone && !completionRecord[dateStr]) {
+        completionRecord[dateStr] = true;
+        localStorage.setItem('completionRecord', JSON.stringify(completionRecord));
+        renderMiniCalendar();
+      }
+    }
+    
+    // ===== 数据导入导出 =====
+    function exportData() {
+      const data = {
+        completionRecord,
+        exerciseAnswers,
+        writingContent,
+        exportDate: new Date().toISOString()
+      };
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `学习日历_${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          completionRecord = data.completionRecord || {};
+          exerciseAnswers = data.exerciseAnswers || {};
+          writingContent = data.writingContent || {};
+          
+          localStorage.setItem('completionRecord', JSON.stringify(completionRecord));
+          localStorage.setItem('exerciseAnswers', JSON.stringify(exerciseAnswers));
+          localStorage.setItem('writingContent', JSON.stringify(writingContent));
+          
+          alert('数据导入成功！');
+          renderMiniCalendar();
+          renderMainContent();
+        } catch (err) {
+          alert('导入失败，文件格式错误');
+        }
+      };
+      reader.readAsText(file);
+    }
+    
+    // ===== 初始化 =====
+    function init() {
+      if (!data2026 || Object.keys(data2026).length === 0) {
+        document.getElementById('mainContent').innerHTML = '<p style="text-align:center;color:red;">错误：无法加载data2026.js。请确保data2026.js在同一目录。</p>';
+        return;
+      }
+      
+      const today = new Date().toISOString().split('T')[0];
+      if (hasDataForDate(today) && !isDateInFuture(today)) {
+        currentDate = today;
+        currentMonth = new Date().getMonth() + 1;
+      } else {
+        for (let i = 0; i < 30; i++) {
+          const d = new Date();
+          d.setDate(d.getDate() - i);
+          const dateStr = d.toISOString().split('T')[0];
+          if (hasDataForDate(dateStr)) {
+            currentDate = dateStr;
+            currentMonth = d.getMonth() + 1;
+            break;
+          }
+        }
+      }
+      
+      renderMiniCalendar();
+      renderMainContent();
+    }
+    
+    init();
+  </script>
+</body>
+</html>
